@@ -39,7 +39,9 @@ LGPL License Terms @ref lgpl_license
 #include <libopencm3/stm32/memorymap.h>
 #include <libopencm3/stm32/common/gpio_common_all.h>
 
-/* --- Convenience macros -------------------------------------------------- */
+/*****************************************************************************/
+/* Module definitions                                                        */
+/*****************************************************************************/
 
 /* GPIO port base addresses (for convenience) */
 /** @defgroup gpio_port_id GPIO Port IDs
@@ -521,7 +523,9 @@ LGPL License Terms @ref lgpl_license
 #define GPIO_BANK_ETH_RE_RXD2		GPIOD		/* PD11 */
 #define GPIO_BANK_ETH_RE_RXD3		GPIOD		/* PD12 */
 
-/* --- GPIO registers ------------------------------------------------------ */
+/*****************************************************************************/
+/* Register definitions                                                      */
+/*****************************************************************************/
 
 /* Port configuration register low (GPIOx_CRL) */
 #define GPIO_CRL(port)			MMIO32(port + 0x00)
@@ -674,6 +678,11 @@ If mode specifies output, configuration can be
 
 /* AF remap and debug I/O configuration register (AFIO_MAPR) */
 #define AFIO_MAPR2			MMIO32(AFIO_BASE + 0x1C)
+
+
+/*****************************************************************************/
+/* Register values                                                           */
+/*****************************************************************************/
 
 /* --- AFIO_EVCR values ---------------------------------------------------- */
 
@@ -938,8 +947,13 @@ Line Devices only
 #define AFIO_EXTI15               15
 
 /**@}*/
+/*****************************************************************************/
+/* API definitions                                                           */
+/*****************************************************************************/
 
-/* --- Function prototypes ------------------------------------------------- */
+/*****************************************************************************/
+/* API Functions                                                             */
+/*****************************************************************************/
 
 BEGIN_DECLS
 

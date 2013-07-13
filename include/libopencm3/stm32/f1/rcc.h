@@ -42,10 +42,16 @@ LGPL License Terms @ref lgpl_license
 #include <libopencm3/stm32/memorymap.h>
 #include <libopencm3/cm3/common.h>
 
+/*****************************************************************************/
+/* Module definitions                                                        */
+/*****************************************************************************/
+
+/*****************************************************************************/
+/* Register definitions                                                      */
+/*****************************************************************************/
+
 /* Note: Regs/bits marked (**) only exist in "connectivity line" STM32s. */
 /* Note: Regs/bits marked (XX) do NOT exist in "connectivity line" STM32s. */
-
-/* --- RCC registers ------------------------------------------------------- */
 
 #define RCC_CR					MMIO32(RCC_BASE + 0x00)
 #define RCC_CFGR				MMIO32(RCC_BASE + 0x04)
@@ -59,6 +65,10 @@ LGPL License Terms @ref lgpl_license
 #define RCC_CSR					MMIO32(RCC_BASE + 0x24)
 #define RCC_AHBRSTR				MMIO32(RCC_BASE + 0x28) /*(**)*/
 #define RCC_CFGR2				MMIO32(RCC_BASE + 0x2c) /*(**)*/
+
+/*****************************************************************************/
+/* Register values                                                           */
+/*****************************************************************************/
 
 /* --- RCC_CR values ------------------------------------------------------- */
 
@@ -489,15 +499,21 @@ LGPL License Terms @ref lgpl_license
 #define RCC_CFGR2_PREDIV2_DIV15			0xe
 #define RCC_CFGR2_PREDIV2_DIV16			0xf
 
+/*****************************************************************************/
+/* API definitions                                                           */
+/*****************************************************************************/
+
 /* --- Variable definitions ------------------------------------------------ */
 extern uint32_t rcc_ppre1_frequency;
 extern uint32_t rcc_ppre2_frequency;
 
-/* --- Function prototypes ------------------------------------------------- */
-
 typedef enum {
 	PLL, PLL2, PLL3, HSE, HSI, LSE, LSI
 } osc_t;
+
+/*****************************************************************************/
+/* API Functions                                                             */
+/*****************************************************************************/
 
 BEGIN_DECLS
 

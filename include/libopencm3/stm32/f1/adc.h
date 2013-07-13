@@ -41,7 +41,9 @@ LGPL License Terms @ref lgpl_license
 #include <libopencm3/stm32/memorymap.h>
 #include <libopencm3/cm3/common.h>
 
-/* --- Convenience macros -------------------------------------------------- */
+/*****************************************************************************/
+/* Module definitions                                                        */
+/*****************************************************************************/
 
 /* ADC port base addresses (for convenience) */
 /****************************************************************************/
@@ -54,7 +56,9 @@ LGPL License Terms @ref lgpl_license
 #define ADC3				ADC3_BASE
 /**@}*/
 
-/* --- ADC registers ------------------------------------------------------- */
+/*****************************************************************************/
+/* Register definitions                                                      */
+/*****************************************************************************/
 
 /* ADC status register (ADC_SR) */
 #define ADC_SR(block)			MMIO32(block + 0x00)
@@ -164,9 +168,14 @@ LGPL License Terms @ref lgpl_license
 #define ADC2_DR				ADC_DR(ADC2)
 #define ADC3_DR				ADC_DR(ADC3)
 
-/* --- ADC Channels ------------------------------------------------------- */
 
-/****************************************************************************/
+/*****************************************************************************/
+/* Register values                                                           */
+/*****************************************************************************/
+
+/* --- ADC Channels -------------------------------------------------------- */
+
+/*****************************************************************************/
 /** @defgroup adc_channel ADC Channel Numbers
 @ingroup adc_defines
 
@@ -224,7 +233,7 @@ LGPL License Terms @ref lgpl_license
  * SIM: Slow interleaved mode only.
  * ATM: Alternate trigger mode only.
  */
-/****************************************************************************/
+/*****************************************************************************/
 /* ADC_CR1 DUALMOD[3:0] ADC Mode Selection */
 /** @defgroup adc_cr1_dualmod ADC Mode Selection
 @ingroup adc_defines
@@ -255,7 +264,7 @@ LGPL License Terms @ref lgpl_license
 #define ADC_CR1_DUALMOD_SHIFT		16
 
 /* DISCNUM[2:0]: Discontinuous mode channel count. */
-/****************************************************************************/
+/*****************************************************************************/
 /** @defgroup adc_cr1_discnum ADC Number of channels in discontinuous mode.
 @ingroup adc_defines
 
@@ -303,7 +312,7 @@ LGPL License Terms @ref lgpl_license
  * ADC2: Analog channel 16 and 17 are internally connected to V_SS.
  * ADC3: Analog channel 9, 14, 15, 16 and 17 are internally connected to V_SS.
  */
-/****************************************************************************/
+/*****************************************************************************/
 /* ADC_CR1 AWDCH[4:0] ADC watchdog channel */
 /** @defgroup adc_watchdog_channel ADC watchdog channel
 @ingroup adc_defines
@@ -331,7 +340,7 @@ LGPL License Terms @ref lgpl_license
 #define ADC_CR1_AWDCH_MASK		(0x1F << 0)
 #define ADC_CR1_AWDCH_SHIFT		0
 
-/* --- ADC_CR2 values ------------------------------------------------------ */
+/* --- ADC_CR2 values ------------------------------------------------------- */
 
 /* TSVREFE: */ /** Temperature sensor and V_REFINT enable. (ADC1 only!) */
 #define ADC_CR2_TSVREFE			(1 << 23)
@@ -347,7 +356,7 @@ LGPL License Terms @ref lgpl_license
 
 /* EXTSEL[2:0]: External event select for regular group. */
 /* The following are only valid for ADC1 and ADC2. */
-/****************************************************************************/
+/*****************************************************************************/
 /* ADC_CR2 EXTSEL[2:0] ADC Trigger Identifier for ADC1 and ADC2 */
 /** @defgroup adc_trigger_regular_12 ADC Trigger Identifier for ADC1 and ADC2
 @ingroup adc_defines
@@ -372,7 +381,7 @@ LGPL License Terms @ref lgpl_license
 /**@}*/
 
 /* The following are only valid for ADC3 */
-/****************************************************************************/
+/*****************************************************************************/
 /* ADC_CR2 EXTSEL[2:0] ADC Trigger Identifier for ADC3 */
 /** @defgroup adc_trigger_regular_3 ADC Trigger Identifier for ADC3
 @ingroup adc_defines
@@ -404,7 +413,7 @@ LGPL License Terms @ref lgpl_license
 
 /* JEXTSEL[2:0]: External event selection for injected group. */
 /* The following are only valid for ADC1 and ADC2. */
-/****************************************************************************/
+/*****************************************************************************/
 /* ADC_CR2 JEXTSEL[2:0] ADC Injected Trigger Identifier for ADC1 and ADC2 */
 /** @defgroup adc_trigger_injected_12 ADC Injected Trigger Identifier for ADC1
 and ADC2
@@ -430,7 +439,7 @@ and ADC2
 /**@}*/
 
 /* The following are the different meanings for ADC3 only. */
-/****************************************************************************/
+/*****************************************************************************/
 /* ADC_CR2 JEXTSEL[2:0] ADC Injected Trigger Identifier for ADC3 */
 /** @defgroup adc_trigger_injected_3 ADC Injected Trigger Identifier for ADC3
 @ingroup adc_defines
@@ -527,8 +536,8 @@ and ADC2
 #define ADC_SMPR2_SMP1_MSK		(0x7 << ADC_SMP1_LSB)
 #define ADC_SMPR2_SMP0_MSK		(0x7 << ADC_SMP0_LSB)
 
-/* --- ADC_SMPRx values --------------------------------------------------- */
-/****************************************************************************/
+/* --- ADC_SMPRx values ---------------------------------------------------- */
+/*****************************************************************************/
 /* ADC_SMPRG ADC Sample Time Selection for Channels */
 /** @defgroup adc_sample_rg ADC Sample Time Selection for All Channels
 @ingroup adc_defines
@@ -604,7 +613,7 @@ and ADC2
 #define ADC_JSQR_JSQ1_LSB		0
 
 /* JL[2:0]: Discontinuous mode channel count injected channels. */
-/****************************************************************************/
+/*****************************************************************************/
 /** @defgroup adc_jsqr_jl ADC Number of channels in discontinuous mode from
 injected channels.
 @ingroup adc_defines
@@ -632,7 +641,13 @@ injected channels.
 #define ADC_ADC2DATA_MSK		(0xffff << ADC_ADC2DATA_LSB)
 					/* ADC1 only (dual mode) */
 
-/* --- Function prototypes ------------------------------------------------- */
+/*****************************************************************************/
+/* API definitions                                                           */
+/*****************************************************************************/
+
+/*****************************************************************************/
+/* API Functions                                                             */
+/*****************************************************************************/
 
 BEGIN_DECLS
 
