@@ -61,20 +61,6 @@ LGPL License Terms @ref lgpl_license
 /* Register definitions                                                      */
 /*****************************************************************************/
 
-
-
-/* ADC control register 1 (ADC_CR1) */
-#define ADC_CR1(block)			MMIO32(block + 0x04)
-#define ADC1_CR1			ADC_CR1(ADC1)
-#define ADC2_CR1			ADC_CR1(ADC2)
-#define ADC3_CR1			ADC_CR1(ADC3)
-
-/* ADC control register 2 (ADC_CR2) */
-#define ADC_CR2(block)			MMIO32(block + 0x08)
-#define ADC1_CR2			ADC_CR2(ADC1)
-#define ADC2_CR2			ADC_CR2(ADC2)
-#define ADC3_CR2			ADC_CR2(ADC3)
-
 /* ADC sample time register 1 (ADC_SMPR1) */
 #define ADC_SMPR1(block)		MMIO32(block + 0x0c)
 #define ADC1_SMPR1			ADC_SMPR1(ADC1)
@@ -201,11 +187,7 @@ LGPL License Terms @ref lgpl_license
 
 /* --- ADC_CR1 values ------------------------------------------------------ */
 
-/* AWDEN: Analog watchdog enable on regular channels */
-#define ADC_CR1_AWDEN			(1 << 23)
 
-/* JAWDEN: Analog watchdog enable on injected channels */
-#define ADC_CR1_JAWDEN			(1 << 22)
 
 /* Note: Bits [21:20] are reserved, and must be kept at reset value. */
 
@@ -251,83 +233,6 @@ LGPL License Terms @ref lgpl_license
 /**@}*/
 #define ADC_CR1_DUALMOD_MASK		(0xF << 16)
 #define ADC_CR1_DUALMOD_SHIFT		16
-
-/* DISCNUM[2:0]: Discontinuous mode channel count. */
-/*****************************************************************************/
-/** @defgroup adc_cr1_discnum ADC Number of channels in discontinuous mode.
-@ingroup adc_defines
-
-@{*/
-#define ADC_CR1_DISCNUM_1CHANNELS       (0x0 << 13)
-#define ADC_CR1_DISCNUM_2CHANNELS       (0x1 << 13)
-#define ADC_CR1_DISCNUM_3CHANNELS       (0x2 << 13)
-#define ADC_CR1_DISCNUM_4CHANNELS       (0x3 << 13)
-#define ADC_CR1_DISCNUM_5CHANNELS       (0x4 << 13)
-#define ADC_CR1_DISCNUM_6CHANNELS       (0x5 << 13)
-#define ADC_CR1_DISCNUM_7CHANNELS       (0x6 << 13)
-#define ADC_CR1_DISCNUM_8CHANNELS       (0x7 << 13)
-/**@}*/
-#define ADC_CR1_DISCNUM_MASK		(0x7 << 13)
-#define ADC_CR1_DISCNUM_SHIFT		13
-
-/* JDISCEN: */ /** Discontinuous mode on injected channels. */
-#define ADC_CR1_JDISCEN			(1 << 12)
-
-/* DISCEN: */ /** Discontinuous mode on regular channels. */
-#define ADC_CR1_DISCEN			(1 << 11)
-
-/* JAUTO: */ /** Automatic Injection Group conversion. */
-#define ADC_CR1_JAUTO			(1 << 10)
-
-/* AWDSGL: */ /** Enable the watchdog on a single channel in scan mode. */
-#define ADC_CR1_AWDSGL			(1 << 9)
-
-/* SCAN: */ /** Scan mode. */
-#define ADC_CR1_SCAN			(1 << 8)
-
-/* JEOCIE: */ /** Interrupt enable for injected channels. */
-#define ADC_CR1_JEOCIE			(1 << 7)
-
-/* AWDIE: */ /** Analog watchdog interrupt enable. */
-#define ADC_CR1_AWDIE			(1 << 6)
-
-/* EOCIE: */ /** Interrupt enable EOC. */
-#define ADC_CR1_EOCIE			(1 << 5)
-
-/* AWDCH[4:0]: Analog watchdog channel bits. (Up to 17 other values reserved) */
-/* Notes:
- * ADC1: Analog channel 16 and 17 are internally connected to the temperature
- * sensor and V_REFINT, respectively.
- * ADC2: Analog channel 16 and 17 are internally connected to V_SS.
- * ADC3: Analog channel 9, 14, 15, 16 and 17 are internally connected to V_SS.
- */
-/*****************************************************************************/
-/* ADC_CR1 AWDCH[4:0] ADC watchdog channel */
-/** @defgroup adc_watchdog_channel ADC watchdog channel
-@ingroup adc_defines
-
-@{*/
-#define ADC_CR1_AWDCH_CHANNEL0		(0x00 << 0)
-#define ADC_CR1_AWDCH_CHANNEL1		(0x01 << 0)
-#define ADC_CR1_AWDCH_CHANNEL2		(0x02 << 0)
-#define ADC_CR1_AWDCH_CHANNEL3		(0x03 << 0)
-#define ADC_CR1_AWDCH_CHANNEL4		(0x04 << 0)
-#define ADC_CR1_AWDCH_CHANNEL5		(0x05 << 0)
-#define ADC_CR1_AWDCH_CHANNEL6		(0x06 << 0)
-#define ADC_CR1_AWDCH_CHANNEL7		(0x07 << 0)
-#define ADC_CR1_AWDCH_CHANNEL8		(0x08 << 0)
-#define ADC_CR1_AWDCH_CHANNEL9		(0x09 << 0)
-#define ADC_CR1_AWDCH_CHANNEL10		(0x0A << 0)
-#define ADC_CR1_AWDCH_CHANNEL11		(0x0B << 0)
-#define ADC_CR1_AWDCH_CHANNEL12		(0x0C << 0)
-#define ADC_CR1_AWDCH_CHANNEL13		(0x0D << 0)
-#define ADC_CR1_AWDCH_CHANNEL14		(0x0E << 0)
-#define ADC_CR1_AWDCH_CHANNEL15		(0x0F << 0)
-#define ADC_CR1_AWDCH_CHANNEL16		(0x10 << 0)
-#define ADC_CR1_AWDCH_CHANNEL17		(0x11 << 0)
-/**@}*/
-#define ADC_CR1_AWDCH_MASK		(0x1F << 0)
-#define ADC_CR1_AWDCH_SHIFT		0
 
 /* --- ADC_CR2 values ------------------------------------------------------- */
 
@@ -455,34 +360,12 @@ and ADC2
 #define ADC_CR2_JEXTSEL_MASK		(0x7 << 12)
 #define ADC_CR2_JEXTSEL_SHIFT		12
 
-/* ALIGN: Data alignment. */
-#define ADC_CR2_ALIGN_RIGHT             (0 << 11)
-#define ADC_CR2_ALIGN_LEFT              (1 << 11)
-#define ADC_CR2_ALIGN			(1 << 11)
-
-/* Note: Bits [10:9] are reserved and must be kept at reset value. */
-
-/* DMA: Direct memory access mode. (ADC1 and ADC3 only!) */
-#define ADC_CR2_DMA			(1 << 8)
-
-/* Note: Bits [7:4] are reserved and must be kept at reset value. */
-
 /* RSTCAL: Reset calibration. */
 #define ADC_CR2_RSTCAL			(1 << 3)
 
 /* CAL: A/D Calibration. */
 #define ADC_CR2_CAL			(1 << 2)
 
-/* CONT: Continous conversion. */
-#define ADC_CR2_CONT			(1 << 1)
-
-/* ADON: A/D converter On/Off. */
-/* Note: If any other bit in this register apart from ADON is changed at the
- * same time, then conversion is not triggered. This is to prevent triggering
- * an erroneous conversion.
- * Conclusion: Must be separately written.
- */
-#define ADC_CR2_ADON			(1 << 0)
 
 /* --- ADC_SMPR1 values ---------------------------------------------------- */
 #define ADC_SMPR1_SMP17_LSB		21
