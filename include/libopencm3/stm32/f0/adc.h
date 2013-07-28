@@ -35,6 +35,7 @@
 
 #include <libopencm3/cm3/common.h>
 #include <libopencm3/stm32/memorymap.h>
+#include <libopencm3/stm32/adc_common_f03a.h>
 
 /*****************************************************************************/
 /* Module definitions                                                        */
@@ -44,8 +45,7 @@
  * @ingroup adc_defines
  *
  *@{*/
-#define ADC				ADC_BASE
-#define ADC1				ADC_BASE/* for API compatibility */
+#define ADC1				ADC_BASE
 /**@}*/
 
 /*****************************************************************************/

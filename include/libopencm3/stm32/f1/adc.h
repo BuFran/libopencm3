@@ -40,6 +40,7 @@ LGPL License Terms @ref lgpl_license
 
 #include <libopencm3/stm32/memorymap.h>
 #include <libopencm3/cm3/common.h>
+#include <libopencm3/stm32/adc_common_l1f123b4.h>
 
 /*****************************************************************************/
 /* Module definitions                                                        */

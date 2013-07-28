@@ -36,16 +36,22 @@
 
 #include <libopencm3/stm32/memorymap.h>
 #include <libopencm3/cm3/common.h>
+#include <libopencm3/stm32/adc_common_f03a.h>
 
 
 /*****************************************************************************/
 /* Module definitions                                                        */
 /*****************************************************************************/
 
+/** @defgroup adc_reg_base ADC register base addresses
+@ingroup adc_defines
+
+@{*/
 #define ADC1		ADC1_BASE
 #define ADC2		ADC2_BASE
 #define ADC3		ADC3_BASE
 #define ADC4		ADC4_BASE
+/**@}*/
 
 /*****************************************************************************/
 /* Register definitions                                                      */
