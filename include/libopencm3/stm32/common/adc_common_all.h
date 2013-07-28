@@ -36,11 +36,6 @@ specific memorymap.h header before including this header file.*/
 /* Module definitions                                                        */
 /*****************************************************************************/
 
-#define ADC1		ADC1_BASE
-#define ADC2		ADC2_BASE
-#define ADC3		ADC3_BASE
-#define ADC4		ADC4_BASE
-
 /*****************************************************************************/
 /* Register definitions                                                      */
 /*****************************************************************************/
