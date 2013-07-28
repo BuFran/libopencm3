@@ -40,9 +40,22 @@ specific memorymap.h header before including this header file.*/
 /* Register definitions                                                      */
 /*****************************************************************************/
 
+/* ADC status register (ADC_SR) */
+#define ADC_SR(block)			MMIO32(block + 0x00)
+#define ADC1_SR				ADC_SR(ADC1)
+#define ADC2_SR				ADC_SR(ADC2)
+#define ADC3_SR				ADC_SR(ADC3)
+
 /*****************************************************************************/
 /* Register values                                                           */
 /*****************************************************************************/
+
+/* ADC_SR values ----------------------------------------------------------- */
+#define ADC_SR_STRT			(1 << 4)
+#define ADC_SR_JSTRT			(1 << 3)
+#define ADC_SR_JEOC			(1 << 2)
+#define ADC_SR_EOC			(1 << 1)
+#define ADC_SR_AWD			(1 << 0)
 
 /*****************************************************************************/
 /* API definitions                                                           */
