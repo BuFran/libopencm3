@@ -35,7 +35,7 @@
 
 #include <libopencm3/cm3/common.h>
 #include <libopencm3/stm32/memorymap.h>
-#include <libopencm3/stm32/adc_common_f03a.h>
+#include <libopencm3/stm32/common/adc_common_f03a.h>
 
 /*****************************************************************************/
 /* Module definitions                                                        */

@@ -40,7 +40,7 @@ LGPL License Terms @ref lgpl_license
 
 #include <libopencm3/stm32/memorymap.h>
 #include <libopencm3/cm3/common.h>
-#include <libopencm3/stm32/adc_common_l1f123b4.h>
+#include <libopencm3/stm32/common/adc_common_l1f123b4.h>
 
 /*****************************************************************************/
 /* Module definitions                                                        */
@@ -67,8 +67,8 @@ LGPL License Terms @ref lgpl_license
 
 /* --- ADC Channels -------------------------------------------------------- */
 
-#define ADC_MASK		    0x1F
-#define ADC_SHIFT		    0
+#define ADC_MASK			0x1F
+#define ADC_SHIFT			0
 
 /* --- ADC_CR1 values ------------------------------------------------------ */
 
