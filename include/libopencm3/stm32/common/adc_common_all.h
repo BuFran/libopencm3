@@ -48,6 +48,35 @@ specific memorymap.h header before including this header file.*/
 /* API definitions                                                           */
 /*****************************************************************************/
 
+#define ADC_CH(i)		(i)
+/** @defgroup adc_channel ADC Channel Numbers
+ * @ingroup adc_defines
+ *
+ * @{*/
+#define ADC_CHANNEL0		ADC_CH(0)
+#define ADC_CHANNEL1		ADC_CH(1)
+#define ADC_CHANNEL2		ADC_CH(2)
+#define ADC_CHANNEL3		ADC_CH(3)
+#define ADC_CHANNEL4		ADC_CH(4)
+#define ADC_CHANNEL5		ADC_CH(5)
+#define ADC_CHANNEL6		ADC_CH(6)
+#define ADC_CHANNEL7		ADC_CH(7)
+#define ADC_CHANNEL8		ADC_CH(8)
+#define ADC_CHANNEL9		ADC_CH(9)
+#define ADC_CHANNEL10		ADC_CH(10)
+#define ADC_CHANNEL11		ADC_CH(11)
+#define ADC_CHANNEL12		ADC_CH(12)
+#define ADC_CHANNEL13		ADC_CH(13)
+#define ADC_CHANNEL14		ADC_CH(14)
+#define ADC_CHANNEL15		ADC_CH(15)
+#define ADC_CHANNEL16		ADC_CH(16)
+#define ADC_CHANNEL17		ADC_CH(17)
+#define ADC_CHANNEL18		ADC_CH(18)
+
+#define ADC_CH_TEMP		ADC_CH(16)
+#define ADC_CH_VREFINT		ADC_CH(17)
+/**@}*/
+
 /*****************************************************************************/
 /* API Functions                                                             */
 /*****************************************************************************/

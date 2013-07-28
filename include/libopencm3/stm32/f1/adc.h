@@ -67,30 +67,6 @@ LGPL License Terms @ref lgpl_license
 
 /* --- ADC Channels -------------------------------------------------------- */
 
-/*****************************************************************************/
-/** @defgroup adc_channel ADC Channel Numbers
-@ingroup adc_defines
-
-@{*/
-#define ADC_CHANNEL0		0x00
-#define ADC_CHANNEL1		0x01
-#define ADC_CHANNEL2		0x02
-#define ADC_CHANNEL3		0x03
-#define ADC_CHANNEL4		0x04
-#define ADC_CHANNEL5		0x05
-#define ADC_CHANNEL6		0x06
-#define ADC_CHANNEL7		0x07
-#define ADC_CHANNEL8		0x08
-#define ADC_CHANNEL9		0x09
-#define ADC_CHANNEL10		0x0A
-#define ADC_CHANNEL11		0x0B
-#define ADC_CHANNEL12		0x0C
-#define ADC_CHANNEL13		0x0D
-#define ADC_CHANNEL14		0x0E
-#define ADC_CHANNEL15		0x0F
-#define ADC_CHANNEL16		0x10
-#define ADC_CHANNEL17		0x11
-/**@}*/
 #define ADC_MASK		    0x1F
 #define ADC_SHIFT		    0
 
@@ -276,46 +252,7 @@ and ADC2
 #define ADC_CR2_CAL			(1 << 2)
 
 
-/* --- ADC_SMPR1 values ---------------------------------------------------- */
-#define ADC_SMPR1_SMP17_LSB		21
-#define ADC_SMPR1_SMP16_LSB		18
-#define ADC_SMPR1_SMP15_LSB		15
-#define ADC_SMPR1_SMP14_LSB		12
-#define ADC_SMPR1_SMP13_LSB		9
-#define ADC_SMPR1_SMP12_LSB		6
-#define ADC_SMPR1_SMP11_LSB		3
-#define ADC_SMPR1_SMP10_LSB		0
-#define ADC_SMPR1_SMP17_MSK		(0x7 << ADC_SMP17_LSB)
-#define ADC_SMPR1_SMP16_MSK		(0x7 << ADC_SMP16_LSB)
-#define ADC_SMPR1_SMP15_MSK		(0x7 << ADC_SMP15_LSB)
-#define ADC_SMPR1_SMP14_MSK		(0x7 << ADC_SMP14_LSB)
-#define ADC_SMPR1_SMP13_MSK		(0x7 << ADC_SMP13_LSB)
-#define ADC_SMPR1_SMP12_MSK		(0x7 << ADC_SMP12_LSB)
-#define ADC_SMPR1_SMP11_MSK		(0x7 << ADC_SMP11_LSB)
-#define ADC_SMPR1_SMP10_MSK		(0x7 << ADC_SMP10_LSB)
 
-/* --- ADC_SMPR2 values ---------------------------------------------------- */
-
-#define ADC_SMPR2_SMP9_LSB		27
-#define ADC_SMPR2_SMP8_LSB		24
-#define ADC_SMPR2_SMP7_LSB		21
-#define ADC_SMPR2_SMP6_LSB		18
-#define ADC_SMPR2_SMP5_LSB		15
-#define ADC_SMPR2_SMP4_LSB		12
-#define ADC_SMPR2_SMP3_LSB		9
-#define ADC_SMPR2_SMP2_LSB		6
-#define ADC_SMPR2_SMP1_LSB		3
-#define ADC_SMPR2_SMP0_LSB		0
-#define ADC_SMPR2_SMP9_MSK		(0x7 << ADC_SMP9_LSB)
-#define ADC_SMPR2_SMP8_MSK		(0x7 << ADC_SMP8_LSB)
-#define ADC_SMPR2_SMP7_MSK		(0x7 << ADC_SMP7_LSB)
-#define ADC_SMPR2_SMP6_MSK		(0x7 << ADC_SMP6_LSB)
-#define ADC_SMPR2_SMP5_MSK		(0x7 << ADC_SMP5_LSB)
-#define ADC_SMPR2_SMP4_MSK		(0x7 << ADC_SMP4_LSB)
-#define ADC_SMPR2_SMP3_MSK		(0x7 << ADC_SMP3_LSB)
-#define ADC_SMPR2_SMP2_MSK		(0x7 << ADC_SMP2_LSB)
-#define ADC_SMPR2_SMP1_MSK		(0x7 << ADC_SMP1_LSB)
-#define ADC_SMPR2_SMP0_MSK		(0x7 << ADC_SMP0_LSB)
 
 /* --- ADC_SMPRx values ---------------------------------------------------- */
 /*****************************************************************************/
@@ -334,86 +271,6 @@ and ADC2
 #define ADC_SMPR_SMP_239DOT5CYC		0x7
 /**@}*/
 
-/* --- ADC_JOFRx, ADC_HTR, ADC_LTR values ---------------------------------- */
-
-#define ADC_JOFFSET_LSB			0
-#define ADC_JOFFSET_MSK			(0x7ff << 0)
-#define ADC_HT_LSB			0
-#define ADC_HT_MSK			(0x7ff << 0)
-#define ADC_LT_LSB			0
-#define ADC_LT_MSK			(0x7ff << 0)
-
-/* --- ADC_SQR1 values ----------------------------------------------------- */
-
-#define ADC_SQR1_L_LSB			20
-#define ADC_SQR1_SQ16_LSB		15
-#define ADC_SQR1_SQ15_LSB		10
-#define ADC_SQR1_SQ14_LSB		5
-#define ADC_SQR1_SQ13_LSB		0
-#define ADC_SQR1_L_MSK			(0xf << ADC_SQR1_L_LSB)
-#define ADC_SQR1_SQ16_MSK		(0x1f << ADC_SQR1_SQ16_LSB)
-#define ADC_SQR1_SQ15_MSK		(0x1f << ADC_SQR1_SQ15_LSB)
-#define ADC_SQR1_SQ14_MSK		(0x1f << ADC_SQR1_SQ14_LSB)
-#define ADC_SQR1_SQ13_MSK		(0x1f << ADC_SQR1_SQ13_LSB)
-
-/* --- ADC_SQR2 values ----------------------------------------------------- */
-
-#define ADC_SQR2_SQ12_LSB		25
-#define ADC_SQR2_SQ11_LSB		20
-#define ADC_SQR2_SQ10_LSB		15
-#define ADC_SQR2_SQ9_LSB		10
-#define ADC_SQR2_SQ8_LSB		5
-#define ADC_SQR2_SQ7_LSB		0
-#define ADC_SQR2_SQ12_MSK		(0x1f << ADC_SQR2_SQ12_LSB)
-#define ADC_SQR2_SQ11_MSK		(0x1f << ADC_SQR2_SQ11_LSB)
-#define ADC_SQR2_SQ10_MSK		(0x1f << ADC_SQR2_SQ10_LSB)
-#define ADC_SQR2_SQ9_MSK		(0x1f << ADC_SQR2_SQ9_LSB)
-#define ADC_SQR2_SQ8_MSK		(0x1f << ADC_SQR2_SQ8_LSB)
-#define ADC_SQR2_SQ7_MSK		(0x1f << ADC_SQR2_SQ7_LSB)
-
-/* --- ADC_SQR3 values ----------------------------------------------------- */
-
-#define ADC_SQR3_SQ6_LSB		25
-#define ADC_SQR3_SQ5_LSB		20
-#define ADC_SQR3_SQ4_LSB		15
-#define ADC_SQR3_SQ3_LSB		10
-#define ADC_SQR3_SQ2_LSB		5
-#define ADC_SQR3_SQ1_LSB		0
-#define ADC_SQR3_SQ6_MSK		(0x1f << ADC_SQR3_SQ6_LSB)
-#define ADC_SQR3_SQ5_MSK		(0x1f << ADC_SQR3_SQ5_LSB)
-#define ADC_SQR3_SQ4_MSK		(0x1f << ADC_SQR3_SQ4_LSB)
-#define ADC_SQR3_SQ3_MSK		(0x1f << ADC_SQR3_SQ3_LSB)
-#define ADC_SQR3_SQ2_MSK		(0x1f << ADC_SQR3_SQ2_LSB)
-#define ADC_SQR3_SQ1_MSK		(0x1f << ADC_SQR3_SQ1_LSB)
-/* --- ADC_JSQR values ----------------------------------------------------- */
-
-#define ADC_JSQR_JL_LSB			20
-#define ADC_JSQR_JSQ4_LSB		15
-#define ADC_JSQR_JSQ3_LSB		10
-#define ADC_JSQR_JSQ2_LSB		5
-#define ADC_JSQR_JSQ1_LSB		0
-
-/* JL[2:0]: Discontinuous mode channel count injected channels. */
-/*****************************************************************************/
-/** @defgroup adc_jsqr_jl ADC Number of channels in discontinuous mode from
-injected channels.
-@ingroup adc_defines
-
-@{*/
-#define ADC_JSQR_JL_1CHANNELS       (0x0 << ADC_JSQR_JL_LSB)
-#define ADC_JSQR_JL_2CHANNELS       (0x1 << ADC_JSQR_JL_LSB)
-#define ADC_JSQR_JL_3CHANNELS       (0x2 << ADC_JSQR_JL_LSB)
-#define ADC_JSQR_JL_4CHANNELS       (0x3 << ADC_JSQR_JL_LSB)
-/**@}*/
-#define ADC_JSQR_JL_SHIFT		20
-#define ADC_JSQR_JL_MSK			(0x2 << ADC_JSQR_JL_LSB)
-#define ADC_JSQR_JSQ4_MSK		(0x1f << ADC_JSQR_JSQ4_LSB)
-#define ADC_JSQR_JSQ3_MSK		(0x1f << ADC_JSQR_JSQ3_LSB)
-#define ADC_JSQR_JSQ2_MSK		(0x1f << ADC_JSQR_JSQ2_LSB)
-#define ADC_JSQR_JSQ1_MSK		(0x1f << ADC_JSQR_JSQ1_LSB)
-
-#define ADC_JSQR_JSQ_VAL(n,val)		((val) << (((n) - 1) * 5))
-#define ADC_JSQR_JL_VAL(val)		(((val) - 1) << ADC_JSQR_JL_SHIFT)
 
 /* --- ADC_JDRx, ADC_DR values --------------------------------------------- */
 

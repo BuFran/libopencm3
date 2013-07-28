@@ -58,18 +58,6 @@ specific memorymap.h header before including this header file.*/
 #define ADC2_CR2			ADC_CR2(ADC2)
 #define ADC3_CR2			ADC_CR2(ADC3)
 
-/* ADC sample time register 1 (ADC_SMPR1) */
-#define ADC_SMPR1(block)		MMIO32(block + 0x0c)
-#define ADC1_SMPR1			ADC_SMPR1(ADC1)
-#define ADC2_SMPR1			ADC_SMPR1(ADC2)
-#define ADC3_SMPR1			ADC_SMPR1(ADC3)
-
-/* ADC sample time register 2 (ADC_SMPR2) */
-#define ADC_SMPR2(block)		MMIO32(block + 0x10)
-#define ADC1_SMPR2			ADC_SMPR2(ADC1)
-#define ADC2_SMPR2			ADC_SMPR2(ADC2)
-#define ADC3_SMPR2			ADC_SMPR2(ADC3)
-
 /*****************************************************************************/
 /* Register values                                                           */
 /*****************************************************************************/
