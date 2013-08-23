@@ -234,57 +234,6 @@ LGPL License Terms @ref lgpl_license
 #define ADC_LT_LSB			0
 #define ADC_LT_MSK			(0x7ff << 0)
 
-/* --- ADC_SQR1 values ----------------------------------------------------- */
-
-#define ADC_SQR1_L_LSB			20
-#define ADC_SQR1_SQ16_LSB		15
-#define ADC_SQR1_SQ15_LSB		10
-#define ADC_SQR1_SQ14_LSB		5
-#define ADC_SQR1_SQ13_LSB		0
-#define ADC_SQR1_L_MSK			(0xf << ADC_SQR1_L_LSB)
-#define ADC_SQR1_SQ16_MSK		(0x1f << ADC_SQR1_SQ16_LSB)
-#define ADC_SQR1_SQ15_MSK		(0x1f << ADC_SQR1_SQ15_LSB)
-#define ADC_SQR1_SQ14_MSK		(0x1f << ADC_SQR1_SQ14_LSB)
-#define ADC_SQR1_SQ13_MSK		(0x1f << ADC_SQR1_SQ13_LSB)
-
-/* --- ADC_SQR2 values ----------------------------------------------------- */
-
-#define ADC_SQR2_SQ12_LSB		25
-#define ADC_SQR2_SQ11_LSB		20
-#define ADC_SQR2_SQ10_LSB		15
-#define ADC_SQR2_SQ9_LSB		10
-#define ADC_SQR2_SQ8_LSB		5
-#define ADC_SQR2_SQ7_LSB		0
-#define ADC_SQR2_SQ12_MSK		(0x1f << ADC_SQR2_SQ12_LSB)
-#define ADC_SQR2_SQ11_MSK		(0x1f << ADC_SQR2_SQ11_LSB)
-#define ADC_SQR2_SQ10_MSK		(0x1f << ADC_SQR2_SQ10_LSB)
-#define ADC_SQR2_SQ9_MSK		(0x1f << ADC_SQR2_SQ9_LSB)
-#define ADC_SQR2_SQ8_MSK		(0x1f << ADC_SQR2_SQ8_LSB)
-#define ADC_SQR2_SQ7_MSK		(0x1f << ADC_SQR2_SQ7_LSB)
-
-/* --- ADC_SQR3 values ----------------------------------------------------- */
-
-#define ADC_SQR3_SQ6_LSB		25
-#define ADC_SQR3_SQ5_LSB		20
-#define ADC_SQR3_SQ4_LSB		15
-#define ADC_SQR3_SQ3_LSB		10
-#define ADC_SQR3_SQ2_LSB		5
-#define ADC_SQR3_SQ1_LSB		0
-#define ADC_SQR3_SQ6_MSK		(0x1f << ADC_SQR3_SQ6_LSB)
-#define ADC_SQR3_SQ5_MSK		(0x1f << ADC_SQR3_SQ5_LSB)
-#define ADC_SQR3_SQ4_MSK		(0x1f << ADC_SQR3_SQ4_LSB)
-#define ADC_SQR3_SQ3_MSK		(0x1f << ADC_SQR3_SQ3_LSB)
-#define ADC_SQR3_SQ2_MSK		(0x1f << ADC_SQR3_SQ2_LSB)
-#define ADC_SQR3_SQ1_MSK		(0x1f << ADC_SQR3_SQ1_LSB)
-
-/* --- ADC_JSQR values ----------------------------------------------------- */
-
-#define ADC_JSQR_JL_LSB			20
-#define ADC_JSQR_JSQ4_LSB		15
-#define ADC_JSQR_JSQ3_LSB		10
-#define ADC_JSQR_JSQ2_LSB		5
-#define ADC_JSQR_JSQ1_LSB		0
-
 /* JL[2:0]: Discontinous mode channel count injected channels. */
 /****************************************************************************/
 /** @defgroup adc_jsqr_jl ADC Number of channels in discontinuous mode fro
@@ -292,10 +241,6 @@ injected channels.
 @ingroup STM32F4xx_adc_defines
 
 @{*/
-#define ADC_JSQR_JL_1CHANNELS       (0x0 << ADC_JSQR_JL_LSB)
-#define ADC_JSQR_JL_2CHANNELS       (0x1 << ADC_JSQR_JL_LSB)
-#define ADC_JSQR_JL_3CHANNELS       (0x2 << ADC_JSQR_JL_LSB)
-#define ADC_JSQR_JL_4CHANNELS       (0x3 << ADC_JSQR_JL_LSB)
 /**@}*/
 #define ADC_JSQR_JL_SHIFT		20
 #define ADC_JSQR_JL_MSK			(0x2 << ADC_JSQR_JL_LSB)
@@ -304,8 +249,6 @@ injected channels.
 #define ADC_JSQR_JSQ2_MSK		(0x1f << ADC_JSQR_JSQ2_LSB)
 #define ADC_JSQR_JSQ1_MSK		(0x1f << ADC_JSQR_JSQ1_LSB)
 
-#define ADC_JSQR_JSQ_VAL(n,val)		((val) << (((n) - 1) * 5))
-#define ADC_JSQR_JL_VAL(val)		(((val) - 1) << ADC_JSQR_JL_SHIFT)
 
 /* --- ADC_JDRx, ADC_DR values --------------------------------------------- */
 
