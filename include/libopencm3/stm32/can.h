@@ -678,12 +678,104 @@
 
 /* --- CAN functions -------------------------------------------------------- */
 
+/** @brief Can Bit timing description
+ *
+ * All values are in Time Quantas.
+ *
+ * One bit time = $ TQ * (1 + ts1 + ts2) $
+ * Sample Point = $ (1 + ts1) / (1 + ts1 + ts2) $
+ *
+ * Resynchronization jump width must be less than time segment2 to work properly
+ *
+ * For the exact correct setting, consult the BOSCH appnote:
+ *
+ * http://www.bosch-semiconductors.de/media/pdf_1/canliteratur/cia99paper.pdf
+ *
+ */
+struct can_timing {
+	/** @brief Baud Rate Prescaler value
+	 *
+	 * This defines resolution of the time quanta (TQ)
+	 *
+	 * 1 TQ = apb_clock / brp
+	 */
+	uint32_t brp;
+
+	/** @brief Time segment 1
+	 *
+	 * This defines the number of TQ's in the time segment1
+	 */
+	uint32_t ts1;
+
+	/** @brief Time segment 2
+	 *
+	 * This defines the number of TQ's in the time segment2
+	 */
+	uint32_t ts2;
+
+	/** @brief Synchronization jump
+	 *
+	 * This defines the number of TQ's, which can shring time segment 2 or
+	 * grow time segment 1 in the case of clock speed mismatch.
+	 *
+	 * The bigger values is intended for worser clocks and better cabling.
+	 */
+	uint32_t sjw;
+};
+
+/******************************************************************************/
+/** @defgroup can_freq CAN Bit frequency
+ * @ingroup can_defines
+ *
+ *@{*/
+#define CAN_FREQ_1M		1000000
+#define CAN_FREQ_500K		500000
+#define CAN_FREQ_250K		250000
+#define CAN_FREQ_125K		125000
+#define CAN_FREQ_50K		50000
+#define CAN_FREQ_10K		10000
+/**@}*/
+
+/******************************************************************************/
+/** @defgroup can_samplepoint CAN Sample point values
+ * @ingroup can_defines
+ *
+ *@{*/
+#define CAN_SAMPLE_75		(3 * 0x100 / 4)
+#define CAN_SAMPLE_66		(2 * 0x100 / 3)
+#define CAN_SAMPLE_50		(1 * 0x100 / 2)
+/**@}*/
+
 BEGIN_DECLS
 
 void can_reset(uint32_t canport);
+
+/* Operation modes */
+void can_enter_init_mode(uint32_t canport);
+void can_leave_init_mode(uint32_t canport);
+void can_enter_sleep_mode(uint32_t canport);
+void can_leave_sleep_mode(uint32_t canport);
+
+bool can_enter_init_mode_blocking(uint32_t canport);
+bool can_leave_init_mode_blocking(uint32_t canport);
+
+bool can_is_init_mode(uint32_t canport);
+bool can_is_sleep_mode(uint32_t canport);
+
+/* Operation flags */
+void can_mode_set_timetriggered(uint32_t canport, bool enable);
+void can_mode_set_autobusoff(uint32_t canport, bool enable);
+void can_mode_set_autowakeup(uint32_t canport, bool enable);
+void can_mode_set_noretransmit(uint32_t canport, bool enable);
+void can_mode_set_rxfifo_locked(uint32_t canport, bool enable);
+void can_mode_set_txframe_priority(uint32_t canport, bool enable);
+void can_mode_set_silent(uint32_t canport, bool enable);
+void can_mode_set_loopback(uint32_t canport, bool enable);
+
 int can_init(uint32_t canport, bool ttcm, bool abom, bool awum, bool nart,
 	     bool rflm, bool txfp, uint32_t sjw, uint32_t ts1, uint32_t ts2,
 	     uint32_t brp, bool loopback, bool silent);
+
 
 void can_filter_init(uint32_t canport, uint32_t nr, bool scale_32bit,
 		     bool id_list_mode, uint32_t fr1, uint32_t fr2,
@@ -699,6 +791,7 @@ void can_filter_id_list_16bit_init(uint32_t canport, uint32_t nr, uint16_t id1,
 void can_filter_id_list_32bit_init(uint32_t canport, uint32_t nr, uint32_t id1,
 				   uint32_t id2, uint32_t fifo, bool enable);
 
+/* irq operations */
 void can_enable_irq(uint32_t canport, uint32_t irq);
 void can_disable_irq(uint32_t canport, uint32_t irq);
 
@@ -709,7 +802,18 @@ void can_receive(uint32_t canport, uint8_t fifo, bool release, uint32_t *id,
 		 uint8_t *data);
 
 void can_fifo_release(uint32_t canport, uint8_t fifo);
+
+/* mailbox operations */
 bool can_available_mailbox(uint32_t canport);
+int32_t can_get_empty_mailbox(uint32_t canport);
+
+/* error operations */
+uint32_t can_errorcode(uint32_t canport);
+
+/* timing operations */
+void can_timing_set(uint32_t canport, struct can_timing *timing);
+bool can_timing_init(struct can_timing *timing, uint32_t freq, uint32_t sample);
+uint32_t can_timing_getfreq(struct can_timing *timing);
 
 END_DECLS
 
