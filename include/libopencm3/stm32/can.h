@@ -255,94 +255,72 @@
 #define CAN_TSR_TME0			(1 << 26)
 
 /* CODE[1:0]: Mailbox code */
-#define CAN_TSR_CODE_MASK		(0x3 << 24)
+#define CAN_TSR_CODE_SHIFT		24
+#define CAN_TSR_CODE_MASK		(0x3 << CAN_TSR_CODE_SHIFT)
+#define CAN_TSR_CODE			(0x3 << CAN_TSR_CODE_SHIFT)
 
-/* ABRQ2: Abort request for mailbox 2 */
-#define CAN_TSR_TABRQ2			(1 << 23)
-
-/* 22:20 Reserved, forced by hardware to 0 */
-
-/* TERR2: Transmission error for mailbox 2 */
-#define CAN_TSR_TERR2			(1 << 19)
-
-/* ALST2: Arbitration lost for mailbox 2 */
-#define CAN_TSR_ALST2			(1 << 18)
-
-/* TXOK2: Transmission OK for mailbox 2 */
-#define CAN_TSR_TXOK2			(1 << 17)
-
-/* RQCP2: Request completed mailbox 2 */
-#define CAN_TSR_RQCP2			(1 << 16)
-
-/* ABRQ1: Abort request for mailbox 1 */
-#define CAN_TSR_ABRQ1			(1 << 15)
-
-/* 14:12 Reserved, forced by hardware to 0 */
-
-/* TERR1: Transmission error for mailbox 1 */
-#define CAN_TSR_TERR1			(1 << 11)
-
-/* ALST1: Arbitration lost for mailbox 1 */
-#define CAN_TSR_ALST1			(1 << 10)
-
-/* TXOK1: Transmission OK for mailbox 1 */
-#define CAN_TSR_TXOK1			(1 << 9)
-
-/* RQCP1: Request completed mailbox 1 */
-#define CAN_TSR_RQCP1			(1 << 8)
-
-/* ABRQ0: Abort request for mailbox 0 */
-#define CAN_TSR_ABRQ0			(1 << 7)
+/* ABRQ0: Abort request for mailbox */
+#define CAN_TSR_ABRQ(mbox)		(1 << (7 + (mbox)*8))
+#define CAN_TSR_ABRQ2			CAN_TSR_ABRQ(2)
+#define CAN_TSR_ABRQ1			CAN_TSR_ABRQ(1)
+#define CAN_TSR_ABRQ0			CAN_TSR_ABRQ(0)
 
 /* 6:4 Reserved, forced by hardware to 0 */
 
-/* TERR0: Transmission error for mailbox 0 */
-#define CAN_TSR_TERR0			(1 << 3)
+/* TERR0: Transmission error for mailbox */
+#define CAN_TSR_TERR(mbox)		(1 << (3 + (mbox)*8))
+#define CAN_TSR_TERR2			CAN_TSR_TERR(2)
+#define CAN_TSR_TERR1			CAN_TSR_TERR(1)
+#define CAN_TSR_TERR0			CAN_TSR_TERR(0)
 
-/* ALST0: Arbitration lost for mailbox 0 */
-#define CAN_TSR_ALST0			(1 << 2)
+/* ALST0: Arbitration lost for mailbox */
+#define CAN_TSR_ALST(mbox)		(1 << (2 + (mbox)*8))
+#define CAN_TSR_ALST2			CAN_TSR_ALST(2)
+#define CAN_TSR_ALST1			CAN_TSR_ALST(1)
+#define CAN_TSR_ALST0			CAN_TSR_ALST(0)
 
-/* TXOK0: Transmission OK for mailbox 0 */
-#define CAN_TSR_TXOK0			(1 << 1)
+/* TXOK0: Transmission OK for mailbox*/
+#define CAN_TSR_TXOK(mbox)		(1 << (1 + (mbox)*8))
+#define CAN_TSR_TXOK2			CAN_TSR_TXOK(2)
+#define CAN_TSR_TXOK1			CAN_TSR_TXOK(1)
+#define CAN_TSR_TXOK0			CAN_TSR_TXOK(0)
 
-/* RQCP0: Request completed mailbox 0 */
-#define CAN_TSR_RQCP0			(1 << 0)
 
-/* --- CAN_RF0R values ------------------------------------------------------ */
+/* RQCP0: Request completed mailbox */
+#define CAN_TSR_RQCP(mbox)		(1 << (0 + (mbox)*8))
+#define CAN_TSR_RQCP2			CAN_TSR_RQCP(2)
+#define CAN_TSR_RQCP1			CAN_TSR_RQCP(1)
+#define CAN_TSR_RQCP0			CAN_TSR_RQCP(0)
+
+/* --- CAN_RFxR values ------------------------------------------------------ */
 
 /* 31:6 Reserved, forced by hardware to 0 */
 
-/* RFOM0: Release FIFO 0 output mailbox */
-#define CAN_RF0R_RFOM0			(1 << 5)
+/* RFOM0: Release FIFO x output mailbox */
+#define CAN_RFxR_RFOM			(1 << 5)
+#define CAN_RF0R_RFOM0			CAN_RFxR_RFOM
+#define CAN_RF1R_RFOM1			CAN_RFxR_RFOM
 
 /* FOVR0: FIFO 0 overrun */
-#define CAN_RF0R_FAVR0			(1 << 4)
+#define CAN_RFxR_FOVR			(1 << 4)
+#define CAN_RF0R_FOVR0			CAN_RFxR_FOVR
+#define CAN_RF1R_FOVR1			CAN_RFxR_FOVR
+#define CAN_RF0R_FAVR0			CAN_RFxR_FOVR /* TODO typo fix ? */
+#define CAN_RF0R_FAVR1			CAN_RFxR_FOVR /* TODO typo fix ? */
 
 /* FULL0: FIFO 0 full */
-#define CAN_RF0R_FULL0			(1 << 3)
+#define CAN_RFxR_FULL			(1 << 3)
+#define CAN_RF0R_FULL0			CAN_RFxR_FULL
+#define CAN_RF1R_FULL1			CAN_RFxR_FULL
 
 /* 2 Reserved, forced by hardware to 0 */
 
 /* FMP0[1:0]: FIFO 0 message pending */
-#define CAN_RF0R_FMP0_MASK		(0x3 << 0)
-
-/* --- CAN_RF1R values ------------------------------------------------------ */
-
-/* 31:6 Reserved, forced by hardware to 0 */
-
-/* RFOM1: Release FIFO 1 output mailbox */
-#define CAN_RF1R_RFOM1			(1 << 5)
-
-/* FOVR1: FIFO 1 overrun */
-#define CAN_RF1R_FAVR1			(1 << 4)
-
-/* FULL1: FIFO 1 full */
-#define CAN_RF1R_FULL1			(1 << 3)
-
-/* 2 Reserved, forced by hardware to 0 */
-
-/* FMP1[1:0]: FIFO 1 message pending */
-#define CAN_RF1R_FMP1_MASK		(0x3 << 0)
+#define CAN_RFxR_FMP			(0x3 << 0)
+#define CAN_RF0R_FMP0			CAN_RFxR_FMP
+#define CAN_RF1R_FMP1			CAN_RFxR_FMP
+#define CAN_RF0R_FMP0_MASK		CAN_RFxR_FMP
+#define CAN_RF1R_FMP1_MASK		CAN_RFxR_FMP
 
 /* --- CAN_IER values ------------------------------------------------------- */
 
@@ -373,23 +351,20 @@
 
 /* 7 Reserved, forced by hardware to 0 */
 
-/* FOVIE1: FIFO overrun interrupt enable */
-#define CAN_IER_FOVIE1			(1 << 6)
+/* FOVIE: FIFO overrun interrupt enable */
+#define CAN_IER_FOVIE(fifo)		(1 << (3 + (fifo)*3))
+#define CAN_IER_FOVIE1			CAN_IER_FOVIE(1)
+#define CAN_IER_FOVIE0			CAN_IER_FOVIE(0)
 
-/* FFIE1: FIFO full interrupt enable */
-#define CAN_IER_FFIE1			(1 << 5)
+/* FFIE: FIFO full interrupt enable */
+#define CAN_IER_FFIE(fifo)		(1 << (2 + (fifo)*3))
+#define CAN_IER_FFIE1			CAN_IER_FFIE(1)
+#define CAN_IER_FFIE0			CAN_IER_FFIE(0)
 
-/* FMPIE1: FIFO message pending interrupt enable */
-#define CAN_IER_FMPIE1			(1 << 4)
-
-/* FOVIE0: FIFO overrun interrupt enable */
-#define CAN_IER_FOVIE0			(1 << 3)
-
-/* FFIE0: FIFO full interrupt enable */
-#define CAN_IER_FFIE0			(1 << 2)
-
-/* FMPIE0: FIFO message pending interrupt enable */
-#define CAN_IER_FMPIE0			(1 << 1)
+/* FMPIE: FIFO message pending interrupt enable */
+#define CAN_IER_FMPIE(fifo)		(1 << (1 + (fifo)*3))
+#define CAN_IER_FMPIE1			CAN_IER_FMPIE(1)
+#define CAN_IER_FMPIE0			CAN_IER_FMPIE(0)
 
 /* TMEIE: Transmit mailbox empty interrupt enable */
 #define CAN_IER_TMEIE			(1 << 0)
@@ -398,22 +373,33 @@
 
 /* REC[7:0]: Receive error counter */
 #define CAN_ESR_REC_MASK		(0xF << 24)
+#define CAN_ESR_REC			(0xF << 24)
 
 /* TEC[7:0]: Least significant byte of the 9-bit transmit error counter */
 #define CAN_ESR_TEC_MASK		(0xF << 16)
+#define CAN_ESR_TEC			(0xF << 16)
 
 /* 15:7 Reserved, forced by hardware to 0 */
 
 /* LEC[2:0]: Last error code */
-#define CAN_ESR_LEC_NO_ERROR		(0x0 << 4)
-#define CAN_ESR_LEC_STUFF_ERROR		(0x1 << 4)
-#define CAN_ESR_LEC_FORM_ERROR		(0x2 << 4)
-#define CAN_ESR_LEC_ACK_ERROR		(0x3 << 4)
-#define CAN_ESR_LEC_REC_ERROR		(0x4 << 4)
-#define CAN_ESR_LEC_DOM_ERROR		(0x5 << 4)
-#define CAN_ESR_LEC_CRC_ERROR		(0x6 << 4)
-#define CAN_ESR_LEC_SOFT_ERROR		(0x7 << 4)
-#define CAN_ESR_LEC_MASK		(0x7 << 4)
+#define CAN_ESR_LEC_SHIFT		4
+#define CAN_ESR_LEC_MASK		(0x7 << CAN_ESR_LEC_SHIFT)
+#define CAN_ESR_LEC			(0x7 << CAN_ESR_LEC_SHIFT)
+
+/******************************************************************************/
+/** @defgroup can_esr_values CAN Last Error Codes
+ * @ingroup can_defines
+ *
+ *@{*/
+#define CAN_ESR_LEC_NO_ERROR		(0x0 << CAN_ESR_LEC_SHIFT)
+#define CAN_ESR_LEC_STUFF_ERROR		(0x1 << CAN_ESR_LEC_SHIFT)
+#define CAN_ESR_LEC_FORM_ERROR		(0x2 << CAN_ESR_LEC_SHIFT)
+#define CAN_ESR_LEC_ACK_ERROR		(0x3 << CAN_ESR_LEC_SHIFT)
+#define CAN_ESR_LEC_REC_ERROR		(0x4 << CAN_ESR_LEC_SHIFT)
+#define CAN_ESR_LEC_DOM_ERROR		(0x5 << CAN_ESR_LEC_SHIFT)
+#define CAN_ESR_LEC_CRC_ERROR		(0x6 << CAN_ESR_LEC_SHIFT)
+#define CAN_ESR_LEC_SOFT_ERROR		(0x7 << CAN_ESR_LEC_SHIFT)
+/**@}*/
 
 /* 3 Reserved, forced by hardware to 0 */
 
@@ -437,61 +423,98 @@
 /* 29:26 Reserved, forced by hardware to 0 */
 
 /* SJW[1:0]: Resynchronization jump width */
-#define CAN_BTR_SJW_1TQ			(0x0 << 24)
-#define CAN_BTR_SJW_2TQ			(0x1 << 24)
-#define CAN_BTR_SJW_3TQ			(0x2 << 24)
-#define CAN_BTR_SJW_4TQ			(0x3 << 24)
-#define CAN_BTR_SJW_MASK		(0x3 << 24)
 #define CAN_BTR_SJW_SHIFT		24
+#define CAN_BTR_SJW			(0x3 << CAN_BTR_SJW_SHIFT)
+#define CAN_BTR_SJW_MASK		(0x3 << CAN_BTR_SJW_SHIFT)
+#define CAN_BTR_SJW_VAL(tq)		(((tq) - 1) << CAN_BTR_SJW_SHIFT)
+
+/******************************************************************************/
+/** @defgroup can_sjw_values CAN Resynchronization Jump Width values
+ * @ingroup can_defines
+ *
+ *@{*/
+#define CAN_BTR_SJW_1TQ			CAN_BTR_SJW_VAL(1)
+#define CAN_BTR_SJW_2TQ			CAN_BTR_SJW_VAL(2)
+#define CAN_BTR_SJW_3TQ			CAN_BTR_SJW_VAL(3)
+#define CAN_BTR_SJW_4TQ			CAN_BTR_SJW_VAL(4)
+/**@}*/
+
 
 /* 23 Reserved, forced by hardware to 0 */
 
 /* TS2[2:0]: Time segment 2 */
-#define CAN_BTR_TS2_1TQ			(0x0 << 20)
-#define CAN_BTR_TS2_2TQ			(0x1 << 20)
-#define CAN_BTR_TS2_3TQ			(0x2 << 20)
-#define CAN_BTR_TS2_4TQ			(0x3 << 20)
-#define CAN_BTR_TS2_5TQ			(0x4 << 20)
-#define CAN_BTR_TS2_6TQ			(0x5 << 20)
-#define CAN_BTR_TS2_7TQ			(0x6 << 20)
-#define CAN_BTR_TS2_8TQ			(0x7 << 20)
-#define CAN_BTR_TS2_MASK		(0x7 << 20)
 #define CAN_BTR_TS2_SHIFT		20
+#define CAN_BTR_TS2_MASK		(0x7 << CAN_BTR_TS2_SHIFT)
+#define CAN_BTR_TS2			(0x7 << CAN_BTR_TS2_SHIFT)
+#define CAN_BTR_TS2_VAL(tq)		(((tq) - 1) << CAN_BTR_TS2_SHIFT)
+
+/******************************************************************************/
+/** @defgroup can_ts2_values CAN Time Segment 2 values
+ * @ingroup can_defines
+ *
+ *@{*/
+#define CAN_BTR_TS2_1TQ			CAN_BTR_TS2_VAL(1)
+#define CAN_BTR_TS2_2TQ			CAN_BTR_TS2_VAL(2)
+#define CAN_BTR_TS2_3TQ			CAN_BTR_TS2_VAL(3)
+#define CAN_BTR_TS2_4TQ			CAN_BTR_TS2_VAL(4)
+#define CAN_BTR_TS2_5TQ			CAN_BTR_TS2_VAL(5)
+#define CAN_BTR_TS2_6TQ			CAN_BTR_TS2_VAL(6)
+#define CAN_BTR_TS2_7TQ			CAN_BTR_TS2_VAL(7)
+#define CAN_BTR_TS2_8TQ			CAN_BTR_TS2_VAL(8)
+/**@}*/
 
 /* TS1[3:0]: Time segment 1 */
-#define CAN_BTR_TS1_1TQ			(0x0 << 16)
-#define CAN_BTR_TS1_2TQ			(0x1 << 16)
-#define CAN_BTR_TS1_3TQ			(0x2 << 16)
-#define CAN_BTR_TS1_4TQ			(0x3 << 16)
-#define CAN_BTR_TS1_5TQ			(0x4 << 16)
-#define CAN_BTR_TS1_6TQ			(0x5 << 16)
-#define CAN_BTR_TS1_7TQ			(0x6 << 16)
-#define CAN_BTR_TS1_8TQ			(0x7 << 16)
-#define CAN_BTR_TS1_9TQ			(0x8 << 16)
-#define CAN_BTR_TS1_10TQ		(0x9 << 16)
-#define CAN_BTR_TS1_11TQ		(0xA << 16)
-#define CAN_BTR_TS1_12TQ		(0xB << 16)
-#define CAN_BTR_TS1_13TQ		(0xC << 16)
-#define CAN_BTR_TS1_14TQ		(0xD << 16)
-#define CAN_BTR_TS1_15TQ		(0xE << 16)
-#define CAN_BTR_TS1_16TQ		(0xF << 16)
-#define CAN_BTR_TS1_MASK		(0xF << 16)
 #define CAN_BTR_TS1_SHIFT		16
+#define CAN_BTR_TS1_MASK		(0xF << CAN_BTR_TS1_SHIFT)
+#define CAN_BTR_TS1			(0xF << CAN_BTR_TS1_SHIFT)
+#define CAN_BTR_TS1_VAL(tq)		(((tq) - 1) << CAN_BTR_TS1_SHIFT)
+
+/******************************************************************************/
+/** @defgroup can_ts1_values CAN Time Segment 1 values
+ * @ingroup can_defines
+ *
+ *@{*/
+#define CAN_BTR_TS1_1TQ			CAN_BTR_TS1_VAL(1)
+#define CAN_BTR_TS1_2TQ			CAN_BTR_TS1_VAL(2)
+#define CAN_BTR_TS1_3TQ			CAN_BTR_TS1_VAL(3)
+#define CAN_BTR_TS1_4TQ			CAN_BTR_TS1_VAL(4)
+#define CAN_BTR_TS1_5TQ			CAN_BTR_TS1_VAL(5)
+#define CAN_BTR_TS1_6TQ			CAN_BTR_TS1_VAL(6)
+#define CAN_BTR_TS1_7TQ			CAN_BTR_TS1_VAL(7)
+#define CAN_BTR_TS1_8TQ			CAN_BTR_TS1_VAL(8)
+#define CAN_BTR_TS1_9TQ			CAN_BTR_TS1_VAL(9)
+#define CAN_BTR_TS1_10TQ		CAN_BTR_TS1_VAL(10)
+#define CAN_BTR_TS1_11TQ		CAN_BTR_TS1_VAL(11)
+#define CAN_BTR_TS1_12TQ		CAN_BTR_TS1_VAL(12)
+#define CAN_BTR_TS1_13TQ		CAN_BTR_TS1_VAL(13)
+#define CAN_BTR_TS1_14TQ		CAN_BTR_TS1_VAL(14)
+#define CAN_BTR_TS1_15TQ		CAN_BTR_TS1_VAL(15)
+#define CAN_BTR_TS1_16TQ		CAN_BTR_TS1_VAL(16)
+/**@}*/
+
+
 
 /* 15:10 Reserved, forced by hardware to 0 */
 
 /* BRP[9:0]: Baud rate prescaler */
-#define CAN_BTR_BRP_MASK		(0x1FFUL << 0)
+#define CAN_BTR_BRP_SHIFT		0
+#define CAN_BTR_BRP_MASK		(0x1FFUL << CAN_BTR_BRP_SHIFT)
+#define CAN_BTR_BRP			(0x1FFUL << CAN_BTR_BRP_SHIFT)
+#define CAN_BTR_BRP_VAL(brp)		((brp) << CAN_BTR_BRP_SHIFT)
 
 /* --- CAN_TIxR values ------------------------------------------------------ */
 
 /* STID[10:0]: Standard identifier */
-#define CAN_TIxR_STID_MASK		(0x7FF << 21)
 #define CAN_TIxR_STID_SHIFT		21
+#define CAN_TIxR_STID_MASK		(0x7FF << CAN_TIxR_STID_SHIFT)
+#define CAN_TIxR_STID			(0x7FF << CAN_TIxR_STID_SHIFT)
+#define CAN_TIxR_STID_VAL(id)		((id) << CAN_TIxR_STID_SHIFT)
 
 /* EXID[15:0]: Extended identifier */
-#define CAN_TIxR_EXID_MASK		(0x1FFFFFF << 3)
 #define CAN_TIxR_EXID_SHIFT		3
+#define CAN_TIxR_EXID_MASK		(0x1FFFFFF << CAN_TIxR_EXID_SHIFT)
+#define CAN_TIxR_EXID			(0x1FFFFFF << CAN_TIxR_EXID_SHIFT)
+#define CAN_TIxR_EXID_VAL(id)		((id) << CAN_TIxR_EXID_SHIFT)
 
 /* IDE: Identifier extension */
 #define CAN_TIxR_IDE			(1 << 2)
@@ -505,8 +528,10 @@
 /* --- CAN_TDTxR values ----------------------------------------------------- */
 
 /* TIME[15:0]: Message time stamp */
-#define CAN_TDTxR_TIME_MASK		(0xFFFF << 15)
 #define CAN_TDTxR_TIME_SHIFT		15
+#define CAN_TDTxR_TIME_MASK		(0xFFFF << CAN_TDTxR_TIME_SHIFT)
+#define CAN_TDTxR_TIME			(0xFFFF << CAN_TDTxR_TIME_SHIFT)
+
 
 /* 15:6 Reserved, forced by hardware to 0 */
 
@@ -516,8 +541,10 @@
 /* 7:4 Reserved, forced by hardware to 0 */
 
 /* DLC[3:0]: Data length code */
-#define CAN_TDTxR_DLC_MASK		(0xF << 0)
 #define CAN_TDTxR_DLC_SHIFT		0
+#define CAN_TDTxR_DLC_MASK		(0xF << CAN_TDTxR_DLC_SHIFT)
+#define CAN_TDTxR_DLC			(0xF << CAN_TDTxR_DLC_SHIFT)
+
 
 /* --- CAN_TDLxR values ----------------------------------------------------- */
 
@@ -535,13 +562,17 @@
 
 /* --- CAN_RIxR values ------------------------------------------------------ */
 
+/* TODO: BUG ? Missing shift in _MASK ??? */
 /* STID[10:0]: Standard identifier */
-#define CAN_RIxR_STID_MASK		(0x7FF)
 #define CAN_RIxR_STID_SHIFT		21
+#define CAN_RIxR_STID_MASK		(0x7FF)
+#define CAN_RIxR_STID			(0x7FF << CAN_RIxR_STID_SHIFT)
+
 
 /* EXID[15:0]: Extended identifier */
-#define CAN_RIxR_EXID_MASK		(0x1FFFFFFF)
 #define CAN_RIxR_EXID_SHIFT		3
+#define CAN_RIxR_EXID_MASK		(0x1FFFFFFF)
+#define CAN_RIxR_EXID_MASK		(0x1FFFFFFF << CAN_RIxR_EXID_SHIFT)
 
 /* IDE: Identifier extension */
 #define CAN_RIxR_IDE			(1 << 2)
@@ -554,18 +585,24 @@
 /* --- CAN_RDTxR values ----------------------------------------------------- */
 
 /* TIME[15:0]: Message time stamp */
-#define CAN_RDTxR_TIME_MASK		(0xFFFF << 15)
 #define CAN_RDTxR_TIME_SHIFT		15
+#define CAN_RDTxR_TIME_MASK		(0xFFFF << CAN_RDTxR_TIME_SHIFT)
+#define CAN_RDTxR_TIME			(0xFFFF << CAN_RDTxR_TIME_SHIFT)
+
 
 /* FMI[7:0]: Filter match index */
-#define CAN_RDTxR_FMI_MASK		(0xFF << 8)
 #define CAN_RDTxR_FMI_SHIFT		8
+#define CAN_RDTxR_FMI_MASK		(0xFF << CAN_RDTxR_FMI_SHIFT)
+#define CAN_RDTxR_FMI			(0xFF << CAN_RDTxR_FMI_SHIFT)
+
 
 /* 7:4 Reserved, forced by hardware to 0 */
 
 /* DLC[3:0]: Data length code */
-#define CAN_RDTxR_DLC_MASK		(0xF << 0)
 #define CAN_RDTxR_DLC_SHIFT		0
+#define CAN_RDTxR_DLC_MASK		(0xF << CAN_RDTxR_DLC_SHIFT)
+#define CAN_RDTxR_DLC			(0xF << CAN_RDTxR_DLC_SHIFT)
+
 
 /* --- CAN_RDLxR values ----------------------------------------------------- */
 
@@ -589,8 +626,9 @@
  * CAN2SB[5:0]: CAN2 start bank
  * (only on connectivity line devices otherwise reserved)
  */
-#define CAN_FMR_CAN2SB_MASK		(0x3F << 8)
 #define CAN_FMR_CAN2SB_SHIFT		15
+#define CAN_FMR_CAN2SB_MASK		(0x3F << CAN_FMR_CAN2SB_SHIFT)
+#define CAN_FMR_CAN2SB			(0x3F << CAN_FMR_CAN2SB_SHIFT)
 
 /* 7:1 Reserved, forced to reset value */
 
@@ -675,6 +713,7 @@ void can_receive(uint32_t canport, uint8_t fifo, bool release, uint32_t *id,
 
 void can_fifo_release(uint32_t canport, uint8_t fifo);
 bool can_available_mailbox(uint32_t canport);
+
 END_DECLS
 
 #endif
