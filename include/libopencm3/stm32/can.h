@@ -236,23 +236,17 @@
 
 /* --- CAN_TSR values ------------------------------------------------------- */
 
-/* LOW2: Lowest priority flag for mailbox 2 */
-#define CAN_TSR_LOW2			(1 << 31)
+/* LOW: Lowest priority flag for mailbox*/
+#define CAN_TSR_LOW(mbox)		(1 << (29 + mbox))
+#define CAN_TSR_LOW2			CAN_TSR_LOW(2)
+#define CAN_TSR_LOW1			CAN_TSR_LOW(1)
+#define CAN_TSR_LOW0			CAN_TSR_LOW(0)
 
-/* LOW1: Lowest priority flag for mailbox 1 */
-#define CAN_TSR_LOW1			(1 << 30)
-
-/* LOW0: Lowest priority flag for mailbox 0 */
-#define CAN_TSR_LOW0			(1 << 29)
-
-/* TME2: Transmit mailbox 2 empty */
-#define CAN_TSR_TME2			(1 << 28)
-
-/* TME1: Transmit mailbox 1 empty */
-#define CAN_TSR_TME1			(1 << 27)
-
-/* TME0: Transmit mailbox 0 empty */
-#define CAN_TSR_TME0			(1 << 26)
+/* TME: Transmit mailbox empty */
+#define CAN_TSR_TME(mbox)		(1 << (26 + mbox))
+#define CAN_TSR_TME2			CAN_TSR_TME(2)
+#define CAN_TSR_TME1			CAN_TSR_TME(1)
+#define CAN_TSR_TME0			CAN_TSR_TME(0)
 
 /* CODE[1:0]: Mailbox code */
 #define CAN_TSR_CODE_SHIFT		24
@@ -500,7 +494,7 @@
 #define CAN_BTR_BRP_SHIFT		0
 #define CAN_BTR_BRP_MASK		(0x1FFUL << CAN_BTR_BRP_SHIFT)
 #define CAN_BTR_BRP			(0x1FFUL << CAN_BTR_BRP_SHIFT)
-#define CAN_BTR_BRP_VAL(brp)		((brp) << CAN_BTR_BRP_SHIFT)
+#define CAN_BTR_BRP_VAL(brp)		(((brp) - 1ul) << CAN_BTR_BRP_SHIFT)
 
 /* --- CAN_TIxR values ------------------------------------------------------ */
 
