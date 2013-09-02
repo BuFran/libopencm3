@@ -1,17 +1,18 @@
 /** @defgroup can_defines CAN defines
-
-@ingroup STM32F_defines
-
-@brief <b>libopencm3 Defined Constants and Types for STM32 CAN </b>
-
-@version 1.0.0
-
-@author @htmlonly &copy; @endhtmlonly 2010 Piotr Esden-Tempski <piotr@esden.net>
-
-@date 12 November 2012
-
-LGPL License Terms @ref lgpl_license
-*/
+ *
+ * @ingroup STM32F_defines
+ *
+ * @brief <b>libopencm3 Defined Constants and Types for STM32 CAN </b>
+ *
+ * @version 1.0.0
+ *
+ * @author @htmlonly &copy; @endhtmlonly 2010 Piotr Esden-Tempski
+ * <piotr@esden.net>
+ *
+ * @date 12 November 2012
+ *
+ * LGPL License Terms @ref lgpl_license
+ */
 /*
  * This file is part of the libopencm3 project.
  *
@@ -39,19 +40,19 @@ LGPL License Terms @ref lgpl_license
 
 /**@{*/
 
-/* --- Convenience macros -------------------------------------------------- */
+/* --- Convenience macros --------------------------------------------------- */
 
 /* CAN register base addresses (for convenience) */
-/*****************************************************************************/
+/******************************************************************************/
 /** @defgroup can_reg_base CAN register base address
-@ingroup can_defines
-
-@{*/
+ * @ingroup can_defines
+ *
+ *@{*/
 #define CAN1				BX_CAN1_BASE
 #define CAN2				BX_CAN2_BASE
 /**@}*/
 
-/* --- CAN registers ------------------------------------------------------- */
+/* --- CAN registers -------------------------------------------------------- */
 
 /* CAN master control register (CAN_MCR) */
 #define CAN_MCR(can_base)		MMIO32(can_base + 0x000)
@@ -74,7 +75,7 @@ LGPL License Terms @ref lgpl_license
 
 /* Registers in the offset range 0x020 to 0x17F are reserved. */
 
-/* --- CAN mailbox registers ----------------------------------------------- */
+/* --- CAN mailbox registers ------------------------------------------------ */
 
 /* CAN mailbox / FIFO register offsets */
 #define CAN_MBOX0			0x180
@@ -127,7 +128,7 @@ LGPL License Terms @ref lgpl_license
 #define CAN_RDH0R(can_base)		CAN_RDHxR(can_base, CAN_FIFO0)
 #define CAN_RDH1R(can_base)		CAN_RDHxR(can_base, CAN_FIFO1)
 
-/* --- CAN filter registers ------------------------------------------------ */
+/* --- CAN filter registers ------------------------------------------------- */
 
 /* CAN filter master register (CAN_FMR) */
 #define CAN_FMR(can_base)		MMIO32(can_base + 0x200)
@@ -164,7 +165,7 @@ LGPL License Terms @ref lgpl_license
 #define CAN_FiR2(can_base, bank)	MMIO32(can_base + 0x240 + \
 						(bank * 0x8) + 0x4)
 
-/* --- CAN_MCR values ------------------------------------------------------ */
+/* --- CAN_MCR values ------------------------------------------------------- */
 
 /* 31:17 Reserved, forced by hardware to 0 */
 
@@ -200,7 +201,7 @@ LGPL License Terms @ref lgpl_license
 /* INRQ: Initialization request */
 #define CAN_MCR_INRQ			(1 << 0)
 
-/* --- CAN_MSR values ------------------------------------------------------ */
+/* --- CAN_MSR values ------------------------------------------------------- */
 
 /* 31:12 Reserved, forced by hardware to 0 */
 
@@ -233,7 +234,7 @@ LGPL License Terms @ref lgpl_license
 /* INAK: Initialization acknowledge */
 #define CAN_MSR_INAK			(1 << 0)
 
-/* --- CAN_TSR values ------------------------------------------------------ */
+/* --- CAN_TSR values ------------------------------------------------------- */
 
 /* LOW2: Lowest priority flag for mailbox 2 */
 #define CAN_TSR_LOW2			(1 << 31)
@@ -307,7 +308,7 @@ LGPL License Terms @ref lgpl_license
 /* RQCP0: Request completed mailbox 0 */
 #define CAN_TSR_RQCP0			(1 << 0)
 
-/* --- CAN_RF0R values ----------------------------------------------------- */
+/* --- CAN_RF0R values ------------------------------------------------------ */
 
 /* 31:6 Reserved, forced by hardware to 0 */
 
@@ -325,7 +326,7 @@ LGPL License Terms @ref lgpl_license
 /* FMP0[1:0]: FIFO 0 message pending */
 #define CAN_RF0R_FMP0_MASK		(0x3 << 0)
 
-/* --- CAN_RF1R values ----------------------------------------------------- */
+/* --- CAN_RF1R values ------------------------------------------------------ */
 
 /* 31:6 Reserved, forced by hardware to 0 */
 
@@ -343,7 +344,7 @@ LGPL License Terms @ref lgpl_license
 /* FMP1[1:0]: FIFO 1 message pending */
 #define CAN_RF1R_FMP1_MASK		(0x3 << 0)
 
-/* --- CAN_IER values ------------------------------------------------------ */
+/* --- CAN_IER values ------------------------------------------------------- */
 
 /* 32:18 Reserved, forced by hardware to 0 */
 
@@ -393,7 +394,7 @@ LGPL License Terms @ref lgpl_license
 /* TMEIE: Transmit mailbox empty interrupt enable */
 #define CAN_IER_TMEIE			(1 << 0)
 
-/* --- CAN_ESR values ------------------------------------------------------ */
+/* --- CAN_ESR values ------------------------------------------------------- */
 
 /* REC[7:0]: Receive error counter */
 #define CAN_ESR_REC_MASK		(0xF << 24)
@@ -425,7 +426,7 @@ LGPL License Terms @ref lgpl_license
 /* EWGF: Error warning flag */
 #define CAN_ESR_EWGF			(1 << 0)
 
-/* --- CAN_BTR values ------------------------------------------------------ */
+/* --- CAN_BTR values ------------------------------------------------------- */
 
 /* SILM: Silent mode (debug) */
 #define CAN_BTR_SILM			(1 << 31)

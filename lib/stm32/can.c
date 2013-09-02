@@ -1,21 +1,23 @@
 /** @defgroup can_file CAN
-
-@ingroup STM32F_files
-
-@brief <b>libopencm3 STM32Fxxx CAN</b>
-
-@version 1.0.0
-
-@author @htmlonly &copy; @endhtmlonly 2010 Piotr Esden-Tempski <piotr@esden.net>
-
-@date 12 November 2012
-
-Devices can have up to two CAN peripherals. The peripherals support up to 1MBit
-transmission rate. The peripheral has several filters for incoming messages that
-can be distributed between two FIFOs and three transmit mailboxes.
-
-LGPL License Terms @ref lgpl_license
-*/
+ *
+ * @ingroup STM32F_files
+ *
+ * @brief <b>libopencm3 STM32Fxxx CAN</b>
+ *
+ * @version 1.0.0
+ *
+ * @author @htmlonly &copy; @endhtmlonly 2010 Piotr Esden-Tempski
+ * <piotr@esden.net>
+ *
+ * @date 12 November 2012
+ *
+ * Devices can have up to two CAN peripherals. The peripherals support up to
+ * 1MBit transmission rate. The peripheral has several filters for incoming
+ * messages that can be distributed between two FIFOs and three transmit
+ * mailboxes.
+ *
+ * LGPL License Terms @ref lgpl_license
+ */
 /*
  * This file is part of the libopencm3 project.
  *
@@ -38,6 +40,8 @@ LGPL License Terms @ref lgpl_license
 #include <libopencm3/stm32/can.h>
 #include <libopencm3/stm32/rcc.h>
 
+/**@{*/
+
 /* Timeout for CAN INIT acknowledge
  * this value is difficult to define.
  * INIT is set latest after finishing the current transfer.
@@ -50,15 +54,14 @@ LGPL License Terms @ref lgpl_license
  */
 #define CAN_MSR_INAK_TIMEOUT 0x0000FFFF
 
-/*---------------------------------------------------------------------------*/
+/*----------------------------------------------------------------------------*/
 /** @brief CAN Reset
-
-The CAN peripheral and all its associated configuration registers are placed in
-the reset condition. The reset is effective via the RCC peripheral reset
-system.
-
-@param[in] canport Unsigned int32. CAN block register address base @ref
-can_reg_base.
+ *
+ * The CAN peripheral and all its associated configuration registers are placed
+ * in the reset condition. The reset is effective via the RCC peripheral reset
+ * system.
+ *
+ * @param[in] canport Unsigned int32. CAN block register base @ref can_reg_base.
  */
 void can_reset(uint32_t canport)
 {
@@ -71,24 +74,24 @@ void can_reset(uint32_t canport)
 	}
 }
 
-/*---------------------------------------------------------------------------*/
+/*----------------------------------------------------------------------------*/
 /** @brief CAN Init
-
-Initialize the selected CAN peripheral block.
-
-@param[in] canport Unsigend int32. CAN register base address @ref can_reg_base.
-@param[in] ttcm bool. Time triggered communication mode.
-@param[in] abom bool. Automatic bus-off management.
-@param[in] awum bool. Automatic wakeup mode.
-@param[in] nart bool. No automatic retransmission.
-@param[in] rflm bool. Receive FIFO locked mode.
-@param[in] txfp bool. Transmit FIFO priority.
-@param[in] sjw Unsigned int32. Resynchronization time quanta jump width.
-@param[in] ts1 Unsigned int32. Time segment 1 time quanta width.
-@param[in] ts2 Unsigned int32. Time segment 2 time quanta width.
-@param[in] brp Unsigned int32. Baud rate prescaler.
-@returns int 0 on success, 1 on initialization failure.
-*/
+ *
+ * Initialize the selected CAN peripheral block.
+ *
+ * @param[in] canport Unsigned int32. CAN block register base @ref can_reg_base.
+ * @param[in] ttcm bool. Time triggered communication mode.
+ * @param[in] abom bool. Automatic bus-off management.
+ * @param[in] awum bool. Automatic wakeup mode.
+ * @param[in] nart bool. No automatic retransmission.
+ * @param[in] rflm bool. Receive FIFO locked mode.
+ * @param[in] txfp bool. Transmit FIFO priority.
+ * @param[in] sjw Unsigned int32. Resynchronization time quanta jump width.
+ * @param[in] ts1 Unsigned int32. Time segment 1 time quanta width.
+ * @param[in] ts2 Unsigned int32. Time segment 2 time quanta width.
+ * @param[in] brp Unsigned int32. Baud rate prescaler.
+ * @returns int 0 on success, 1 on initialization failure.
+ */
 int can_init(uint32_t canport, bool ttcm, bool abom, bool awum, bool nart,
 	     bool rflm, bool txfp, uint32_t sjw, uint32_t ts1, uint32_t ts2,
 	     uint32_t brp, bool loopback, bool silent)
@@ -183,19 +186,19 @@ int can_init(uint32_t canport, bool ttcm, bool abom, bool awum, bool nart,
 	return ret;
 }
 
-/*---------------------------------------------------------------------------*/
+/*----------------------------------------------------------------------------*/
 /** @brief CAN Filter Init
-
-Initialize incoming message filter and assign to FIFO.
-
-@param[in] canport Unsigned int32. CAN block register base @ref can_reg_base.
-@param[in] nr Unsigned int32. ID number of the filter.
-@param[in] scale_32bit bool. 32-bit scale for the filter?
-@param[in] id_list_mode bool. ID list filter mode?
-@param[in] fr1 Unsigned int32. First filter register content.
-@param[in] fr2 Unsigned int32. Second filter register content.
-@param[in] fifo Unsigned int32. FIFO id.
-@param[in] enable bool. Enable filter?
+ *
+ * Initialize incoming message filter and assign to FIFO.
+ *
+ * @param[in] canport Unsigned int32. CAN block register base @ref can_reg_base.
+ * @param[in] nr Unsigned int32. ID number of the filter.
+ * @param[in] scale_32bit bool. 32-bit scale for the filter?
+ * @param[in] id_list_mode bool. ID list filter mode?
+ * @param[in] fr1 Unsigned int32. First filter register content.
+ * @param[in] fr2 Unsigned int32. Second filter register content.
+ * @param[in] fifo Unsigned int32. FIFO id.
+ * @param[in] enable bool. Enable filter?
  */
 void can_filter_init(uint32_t canport, uint32_t nr, bool scale_32bit,
 		     bool id_list_mode, uint32_t fr1, uint32_t fr2,
@@ -246,17 +249,17 @@ void can_filter_init(uint32_t canport, uint32_t nr, bool scale_32bit,
 	CAN_FMR(canport) &= ~CAN_FMR_FINIT;
 }
 
-/*---------------------------------------------------------------------------*/
+/*----------------------------------------------------------------------------*/
 /** @brief CAN Initialize a 16bit Message ID Mask Filter
-
-@param[in] canport Unsigned int32. CAN block register base @ref can_reg_base.
-@param[in] nr Unsigned int32. ID number of the filter.
-@param[in] id1 Unsigned int16. First message ID to filter.
-@param[in] mask1 Unsigned int16. First message ID bit mask.
-@param[in] id2 Unsigned int16. Second message ID to filter.
-@param[in] mask2 Unsigned int16. Second message ID bit mask.
-@param[in] fifo Unsigned int32. FIFO id.
-@param[in] enable bool. Enable filter?
+ *
+ * @param[in] canport Unsigned int32. CAN block register base @ref can_reg_base.
+ * @param[in] nr Unsigned int32. ID number of the filter.
+ * @param[in] id1 Unsigned int16. First message ID to filter.
+ * @param[in] mask1 Unsigned int16. First message ID bit mask.
+ * @param[in] id2 Unsigned int16. Second message ID to filter.
+ * @param[in] mask2 Unsigned int16. Second message ID bit mask.
+ * @param[in] fifo Unsigned int32. FIFO id.
+ * @param[in] enable bool. Enable filter?
  */
 void can_filter_id_mask_16bit_init(uint32_t canport, uint32_t nr, uint16_t id1,
 				   uint16_t mask1, uint16_t id2,
@@ -267,15 +270,15 @@ void can_filter_id_mask_16bit_init(uint32_t canport, uint32_t nr, uint16_t id1,
 			((uint32_t)id2 << 16) | (uint32_t)mask2, fifo, enable);
 }
 
-/*---------------------------------------------------------------------------*/
+/*----------------------------------------------------------------------------*/
 /** @brief CAN Initialize a 32bit Message ID Mask Filter
-
-@param[in] canport Unsigned int32. CAN block register base @ref can_reg_base.
-@param[in] nr Unsigned int32. ID number of the filter.
-@param[in] id Unsigned int32. Message ID to filter.
-@param[in] mask Unsigned int32. Message ID bit mask.
-@param[in] fifo Unsigned int32. FIFO id.
-@param[in] enable bool. Enable filter?
+ *
+ * @param[in] canport Unsigned int32. CAN block register base @ref can_reg_base.
+ * @param[in] nr Unsigned int32. ID number of the filter.
+ * @param[in] id Unsigned int32. Message ID to filter.
+ * @param[in] mask Unsigned int32. Message ID bit mask.
+ * @param[in] fifo Unsigned int32. FIFO id.
+ * @param[in] enable bool. Enable filter?
  */
 void can_filter_id_mask_32bit_init(uint32_t canport, uint32_t nr, uint32_t id,
 				   uint32_t mask, uint32_t fifo, bool enable)
@@ -283,17 +286,17 @@ void can_filter_id_mask_32bit_init(uint32_t canport, uint32_t nr, uint32_t id,
 	can_filter_init(canport, nr, true, false, id, mask, fifo, enable);
 }
 
-/*---------------------------------------------------------------------------*/
+/*----------------------------------------------------------------------------*/
 /** @brief CAN Initialize a 16bit Message ID List Filter
-
-@param[in] canport Unsigned int32. CAN block register base @ref can_reg_base.
-@param[in] nr Unsigned int32. ID number of the filter.
-@param[in] id1 Unsigned int16. First message ID to match.
-@param[in] id2 Unsigned int16. Second message ID to match.
-@param[in] id3 Unsigned int16. Third message ID to match.
-@param[in] id4 Unsigned int16. Fourth message ID to match.
-@param[in] fifo Unsigned int32. FIFO id.
-@param[in] enable bool. Enable filter?
+ *
+ * @param[in] canport Unsigned int32. CAN block register base @ref can_reg_base.
+ * @param[in] nr Unsigned int32. ID number of the filter.
+ * @param[in] id1 Unsigned int16. First message ID to match.
+ * @param[in] id2 Unsigned int16. Second message ID to match.
+ * @param[in] id3 Unsigned int16. Third message ID to match.
+ * @param[in] id4 Unsigned int16. Fourth message ID to match.
+ * @param[in] fifo Unsigned int32. FIFO id.
+ * @param[in] enable bool. Enable filter?
  */
 void can_filter_id_list_16bit_init(uint32_t canport, uint32_t nr,
 				   uint16_t id1, uint16_t id2,
@@ -305,15 +308,15 @@ void can_filter_id_list_16bit_init(uint32_t canport, uint32_t nr,
 			((uint32_t)id3 << 16) | (uint32_t)id4, fifo, enable);
 }
 
-/*---------------------------------------------------------------------------*/
+/*----------------------------------------------------------------------------*/
 /** @brief CAN Initialize a 32bit Message ID List Filter
-
-@param[in] canport Unsigned int32. CAN block register base @ref can_reg_base.
-@param[in] nr Unsigned int32. ID number of the filter.
-@param[in] id1 Unsigned int32. First message ID to match.
-@param[in] id2 Unsigned int32. Second message ID to match.
-@param[in] fifo Unsigned int32. FIFO id.
-@param[in] enable bool. Enable filter?
+ *
+ * @param[in] canport Unsigned int32. CAN block register base @ref can_reg_base.
+ * @param[in] nr Unsigned int32. ID number of the filter.
+ * @param[in] id1 Unsigned int32. First message ID to match.
+ * @param[in] id2 Unsigned int32. Second message ID to match.
+ * @param[in] fifo Unsigned int32. FIFO id.
+ * @param[in] enable bool. Enable filter?
  */
 void can_filter_id_list_32bit_init(uint32_t canport, uint32_t nr,
 				   uint32_t id1, uint32_t id2,
@@ -322,39 +325,39 @@ void can_filter_id_list_32bit_init(uint32_t canport, uint32_t nr,
 	can_filter_init(canport, nr, true, true, id1, id2, fifo, enable);
 }
 
-/*---------------------------------------------------------------------------*/
+/*----------------------------------------------------------------------------*/
 /** @brief CAN Enable IRQ
-
-@param[in] canport Unsigned int32. CAN block register base @ref can_reg_base.
-@param[in] irq Unsigned int32. IRQ bit(s).
+ *
+ * @param[in] canport Unsigned int32. CAN block register base @ref can_reg_base.
+ * @param[in] irq Unsigned int32. IRQ bit(s).
  */
 void can_enable_irq(uint32_t canport, uint32_t irq)
 {
 	CAN_IER(canport) |= irq;
 }
 
-/*---------------------------------------------------------------------------*/
+/*----------------------------------------------------------------------------*/
 /** @brief CAN Disable IRQ
-
-@param[in] canport Unsigned int32. CAN block register base @ref can_reg_base.
-@param[in] irq Unsigned int32. IRQ bit(s).
+ *
+ * @param[in] canport Unsigned int32. CAN block register base @ref can_reg_base.
+ * @param[in] irq Unsigned int32. IRQ bit(s).
  */
 void can_disable_irq(uint32_t canport, uint32_t irq)
 {
 	CAN_IER(canport) &= ~irq;
 }
 
-/*---------------------------------------------------------------------------*/
+/*----------------------------------------------------------------------------*/
 /** @brief CAN Transmit Message
-
-@param[in] canport Unsigned int32. CAN block register base @ref can_reg_base.
-@param[in] id Unsigned int32. Message ID.
-@param[in] ext bool. Extended message ID?
-@param[in] rtr bool. Request transmit?
-@param[in] length Unsigned int8. Message payload length.
-@param[in] data Unsigned int8[]. Message payload data.
-@returns int 0, 1 or 2 on success and depending on which outgoing mailbox got
-selected. -1 if no mailbox was available and no transmission got queued.
+ *
+ * @param[in] canport Unsigned int32. CAN block register base @ref can_reg_base.
+ * @param[in] id Unsigned int32. Message ID.
+ * @param[in] ext bool. Extended message ID?
+ * @param[in] rtr bool. Request transmit?
+ * @param[in] length Unsigned int8. Message payload length.
+ * @param[in] data Unsigned int8[]. Message payload data.
+ * @returns int 0, 1 or 2 on success and depending on which outgoing mailbox got
+ * selected. -1 if no mailbox was available and no transmission got queued.
  */
 int can_transmit(uint32_t canport, uint32_t id, bool ext, bool rtr,
 		 uint8_t length, uint8_t *data)
@@ -444,9 +447,9 @@ int can_transmit(uint32_t canport, uint32_t id, bool ext, bool rtr,
 
 /*---------------------------------------------------------------------------*/
 /** @brief CAN Release FIFO
-
-@param[in] canport Unsigned int32. CAN block register base @ref can_reg_base.
-@param[in] fifo Unsigned int8. FIFO id.
+ *
+ * @param[in] canport Unsigned int32. CAN block register base @ref can_reg_base.
+ * @param[in] fifo Unsigned int8. FIFO id.
  */
 void can_fifo_release(uint32_t canport, uint8_t fifo)
 {
@@ -457,18 +460,19 @@ void can_fifo_release(uint32_t canport, uint8_t fifo)
 	}
 }
 
-/*---------------------------------------------------------------------------*/
+/*----------------------------------------------------------------------------*/
 /** @brief CAN Receive Message
-
-@param[in] canport Unsigned int32. CAN block register base @ref can_reg_base.
-@param[in] fifo Unsigned int8. FIFO id.
-@param[in] release bool. Release the FIFO automatically after coping data out.
-@param[out] id Unsigned int32 pointer. Message ID.
-@param[out] ext bool pointer. The message ID is extended?
-@param[out] rtr bool pointer. Request of transmission?
-@param[out] fmi Unsigned int32 pointer. ID of the matched filter.
-@param[out] length Unsigned int8 pointer. Length of message payload.
-@param[out] data Unsigned int8[]. Message payload data.
+ *
+ * @param[in] canport Unsigned int32. CAN block register base @ref can_reg_base.
+ * @param[in] fifo Unsigned int8. FIFO id.
+ * @param[in] release bool. Release the FIFO automatically after coping data
+ * out.
+ * @param[out] id Unsigned int32 pointer. Message ID.
+ * @param[out] ext bool pointer. The message ID is extended?
+ * @param[out] rtr bool pointer. Request of transmission?
+ * @param[out] fmi Unsigned int32 pointer. ID of the matched filter.
+ * @param[out] length Unsigned int8 pointer. Length of message payload.
+ * @param[out] data Unsigned int8[]. Message payload data.
  */
 void can_receive(uint32_t canport, uint8_t fifo, bool release, uint32_t *id,
 		 bool *ext, bool *rtr, uint32_t *fmi, uint8_t *length,
@@ -546,3 +550,5 @@ bool can_available_mailbox(uint32_t canport)
 {
 	return CAN_TSR(canport) & (CAN_TSR_TME0 | CAN_TSR_TME1 | CAN_TSR_TME2);
 }
+
+/**@}*/
