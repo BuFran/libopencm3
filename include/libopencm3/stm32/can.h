@@ -61,10 +61,10 @@
 /* CAN transmit status register (CAN_TSR) */
 #define CAN_TSR(can_base)		MMIO32(can_base + 0x008)
 
-/* CAN receive FIFO 0 register (CAN_RF0R) */
-#define CAN_RF0R(can_base)		MMIO32(can_base + 0x00C)
-/* CAN receive FIFO 1 register (CAN_RF1R) */
-#define CAN_RF1R(can_base)		MMIO32(can_base + 0x010)
+/* CAN receive FIFO registers (CAN_RF0R, CAN_RF1R) */
+#define CAN_RFxR(can_base, fifoid)	MMIO32(can_base + 0x00C + (fifoid) * 4)
+#define CAN_RF0R(can_base)		CAN_RFxR(can_base, 0)
+#define CAN_RF1R(can_base)		CAN_RFxR(can_base, 1)
 
 /* CAN interrupt enable register (CAN_IER) */
 #define CAN_IER(can_base)		MMIO32(can_base + 0x014)
@@ -78,11 +78,14 @@
 /* --- CAN mailbox registers ------------------------------------------------ */
 
 /* CAN mailbox / FIFO register offsets */
-#define CAN_MBOX0			0x180
-#define CAN_MBOX1			0x190
-#define CAN_MBOX2			0x1A0
-#define CAN_FIFO0			0x1B0
-#define CAN_FIFO1			0x1C0
+#define CAN_MBOX(mbox)			(0x180 + 0x10 * (mbox))
+#define CAN_MBOX0			CAN_MBOX(0)
+#define CAN_MBOX1			CAN_MBOX(1)
+#define CAN_MBOX2			CAN_MBOX(2)
+
+#define CAN_FIFO(fifo)			(0x1B0 + 0x10 * (fifo))
+#define CAN_FIFO0			CAN_FIFO(0)
+#define CAN_FIFO1			CAN_FIFO(1)
 
 /* CAN TX mailbox identifier register (CAN_TIxR) */
 #define CAN_TIxR(can_base, mbox)	MMIO32(can_base + mbox + 0x0)
@@ -566,7 +569,7 @@
 /* EXID[15:0]: Extended identifier */
 #define CAN_RIxR_EXID_SHIFT		3
 #define CAN_RIxR_EXID_MASK		(0x1FFFFFFF)
-#define CAN_RIxR_EXID_MASK		(0x1FFFFFFF << CAN_RIxR_EXID_SHIFT)
+#define CAN_RIxR_EXID			(0x1FFFFFFF << CAN_RIxR_EXID_SHIFT)
 
 /* IDE: Identifier extension */
 #define CAN_RIxR_IDE			(1 << 2)
