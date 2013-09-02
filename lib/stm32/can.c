@@ -74,14 +74,137 @@ void can_reset(uint32_t canport)
 	}
 }
 
-bool can_mode_isinit(uint32_t canport)
+void can_enter_init_mode(uint32_t canport)
+{
+	CAN_MCR(canport) |= CAN_MCR_INRQ;
+}
+
+void can_leave_init_mode(uint32_t canport)
+{
+	CAN_MCR(canport) &= ~CAN_MCR_INRQ;
+}
+
+void can_enter_sleep_mode(uint32_t canport)
+{
+	CAN_MCR(canport) |= CAN_MCR_SLEEP;
+}
+
+void can_leave_sleep_mode(uint32_t canport)
+{
+	CAN_MCR(canport) &= ~CAN_MCR_SLEEP;
+}
+
+
+
+bool can_enter_init_mode_blocking(uint32_t canport)
+{
+	volatile uint32_t wait_ack;
+
+	CAN_MCR(canport) |= CAN_MCR_INRQ;
+
+	/* Wait for acknowledge. */
+	wait_ack = CAN_MSR_INAK_TIMEOUT;
+	while ((--wait_ack) && !can_is_init_mode(canport));
+
+	/* Check the acknowledge. */
+	return can_is_init_mode(canport);
+}
+
+bool can_leave_init_mode_blocking(uint32_t canport)
+{
+	volatile uint32_t wait_ack;
+
+	CAN_MCR(canport) &= ~CAN_MCR_INRQ;
+
+	/* Wait for acknowledge. */
+	wait_ack = CAN_MSR_INAK_TIMEOUT;
+	while ((--wait_ack) && can_is_init_mode(canport));
+
+	/* Check the acknowledge. */
+	return !can_is_init_mode(canport);
+}
+
+
+bool can_is_init_mode(uint32_t canport)
 {
 	return (CAN_MSR(canport) & CAN_MSR_INAK) != 0;
 }
 
-bool can_mode_issleep(uint32_t canport)
+bool can_is_sleep_mode(uint32_t canport)
 {
 	return (CAN_MSR(canport) & CAN_MSR_SLAK) != 0;
+}
+
+void can_mode_set_timetriggered(uint32_t canport, bool enable)
+{
+	if (enable) {
+		CAN_MCR(canport) |= CAN_MCR_TTCM;
+	} else {
+		CAN_MCR(canport) &= ~CAN_MCR_TTCM;
+	}
+}
+
+void can_mode_set_autobusoff(uint32_t canport, bool enable)
+{
+	if (enable) {
+		CAN_MCR(canport) |= CAN_MCR_ABOM;
+	} else {
+		CAN_MCR(canport) &= ~CAN_MCR_ABOM;
+	}
+}
+
+void can_mode_set_autowakeup(uint32_t canport, bool enable)
+{
+	if (enable) {
+		CAN_MCR(canport) |= CAN_MCR_AWUM;
+	} else {
+		CAN_MCR(canport) &= ~CAN_MCR_AWUM;
+	}
+}
+
+void can_mode_set_noretransmit(uint32_t canport, bool enable)
+{
+	if (enable) {
+		CAN_MCR(canport) |= CAN_MCR_NART;
+	} else {
+		CAN_MCR(canport) &= ~CAN_MCR_NART;
+	}
+}
+
+void can_mode_set_rxfifo_locked(uint32_t canport, bool enable)
+{
+	if (enable) {
+		CAN_MCR(canport) |= CAN_MCR_RFLM;
+	} else {
+		CAN_MCR(canport) &= ~CAN_MCR_RFLM;
+	}
+}
+
+void can_mode_set_txframe_priority(uint32_t canport, bool enable)
+{
+	if (enable) {
+		CAN_MCR(canport) |= CAN_MCR_TXFP;
+	} else {
+		CAN_MCR(canport) &= ~CAN_MCR_TXFP;
+	}
+}
+
+void can_mode_set_silent(uint32_t canport, bool enable)
+{
+	if (enable) {
+		CAN_BTR(canport) |= CAN_BTR_SILM;
+	} else {
+		CAN_BTR(canport) &= ~CAN_BTR_SILM;
+	}
+}
+
+void can_mode_set_loopback(uint32_t canport, bool enable)
+{
+	if (enable) {
+		CAN_BTR(canport) |= CAN_BTR_LBKM;
+	} else {
+		CAN_BTR(canport) &= ~CAN_BTR_LBKM;
+	}
 }
 
 /*----------------------------------------------------------------------------*/
@@ -106,92 +229,33 @@ int can_init(uint32_t canport, bool ttcm, bool abom, bool awum, bool nart,
 	     bool rflm, bool txfp, uint32_t sjw, uint32_t ts1, uint32_t ts2,
 	     uint32_t brp, bool loopback, bool silent)
 {
-	volatile uint32_t wait_ack;
+	can_leave_sleep_mode(canport);
 
-	/* Exit from sleep mode. */
-	CAN_MCR(canport) &= ~CAN_MCR_SLEEP;
-
-	/* Request initialization "enter". */
-	CAN_MCR(canport) |= CAN_MCR_INRQ;
-
-	/* Wait for acknowledge. */
-	wait_ack = CAN_MSR_INAK_TIMEOUT;
-	while ((--wait_ack) && !can_mode_isinit(canport));
-
-	/* Check the acknowledge. */
-	if (!can_mode_isinit(canport)) {
+	if (!can_enter_init_mode_blocking(canport)) {
 		return 1;
 	}
 
 	/* clear can timing bits */
 	CAN_BTR(canport) = 0;
 
-	/* Set the automatic bus-off management. */
-	if (ttcm) {
-		CAN_MCR(canport) |= CAN_MCR_TTCM;
-	} else {
-		CAN_MCR(canport) &= ~CAN_MCR_TTCM;
-	}
-
-	if (abom) {
-		CAN_MCR(canport) |= CAN_MCR_ABOM;
-	} else {
-		CAN_MCR(canport) &= ~CAN_MCR_ABOM;
-	}
-
-	if (awum) {
-		CAN_MCR(canport) |= CAN_MCR_AWUM;
-	} else {
-		CAN_MCR(canport) &= ~CAN_MCR_AWUM;
-	}
-
-	if (nart) {
-		CAN_MCR(canport) |= CAN_MCR_NART;
-	} else {
-		CAN_MCR(canport) &= ~CAN_MCR_NART;
-	}
-
-	if (rflm) {
-		CAN_MCR(canport) |= CAN_MCR_RFLM;
-	} else {
-		CAN_MCR(canport) &= ~CAN_MCR_RFLM;
-	}
-
-	if (txfp) {
-		CAN_MCR(canport) |= CAN_MCR_TXFP;
-	} else {
-		CAN_MCR(canport) &= ~CAN_MCR_TXFP;
-	}
-
-	if (silent) {
-		CAN_BTR(canport) |= CAN_BTR_SILM;
-	} else {
-		CAN_BTR(canport) &= ~CAN_BTR_SILM;
-	}
-
-	if (loopback) {
-		CAN_BTR(canport) |= CAN_BTR_LBKM;
-	} else {
-		CAN_BTR(canport) &= ~CAN_BTR_LBKM;
-	}
+	/* set the desired mode */
+	can_mode_set_timetriggered(canport, ttcm);
+	can_mode_set_autobusoff(canport, abom);
+	can_mode_set_autowakeup(canport, awum);
+	can_mode_set_noretransmit(canport, nart);
+	can_mode_set_rxfifo_locked(canport, rflm);
+	can_mode_set_txframe_priority(canport, txfp);
+	can_mode_set_silent(canport, silent);
+	can_mode_set_loopback(canport, loopback);
 
 	/* Set bit timings. */
 	CAN_BTR(canport) |= sjw | ts2 | ts1 |
 		(CAN_BTR_BRP_VAL(brp) & CAN_BTR_BRP);
 
-	/* Request initialization "leave". */
-	CAN_MCR(canport) &= ~CAN_MCR_INRQ;
-
-	/* Wait for acknowledge. */
-	wait_ack = CAN_MSR_INAK_TIMEOUT;
-	while ((--wait_ack) && can_mode_isinit(canport));
-
-	if (can_mode_isinit(canport)) {
-		return 1;
-	}
-
-	return 0;
+	return can_leave_init_mode_blocking(canport) ? 0 : 1;
 }
+
+
 
 /*----------------------------------------------------------------------------*/
 /** @brief CAN Filter Init
@@ -377,7 +441,7 @@ int can_transmit(uint32_t canport, uint32_t id, bool ext, bool rtr,
 	} tdlxr, tdhxr;
 
 	/* Check which transmit mailbox is empty if any. */
-	ret = can_mailbox_getempty(canport);
+	ret = can_get_empty_mailbox(canport);
 
 	/* If we have no empty mailbox return with an error. */
 	if (ret == -1) {
@@ -544,7 +608,7 @@ bool can_available_mailbox(uint32_t canport)
 	return CAN_TSR(canport) & (CAN_TSR_TME0 | CAN_TSR_TME1 | CAN_TSR_TME2);
 }
 
-int32_t can_mailbox_getempty(uint32_t canport)
+int32_t can_get_empty_mailbox(uint32_t canport)
 {
 	int32_t i = 0;
 	for (i = 0; i < 3; i++) {
@@ -554,6 +618,95 @@ int32_t can_mailbox_getempty(uint32_t canport)
 	}
 	/* no free mailbox found */
 	return -1;
+}
+
+uint32_t can_errorcode(uint32_t canport)
+{
+	return CAN_ESR(canport) & CAN_ESR_LEC;
+}
+
+
+
+/** @brief Initialize timing structure
+ *
+ * Compute the values in the timing structure to match the desired communication
+ * speed and sample point.
+ *
+ * Sample point is a fraction of 8-bit value. Most useful positions are listed:
+ *
+ * 50% 0x80
+ * 75% 0xC0
+ *
+ * @param[inout] timing struct can_timing* The timing structure
+ * @param[in] freq uint32_t Desired communication speed in bps @ref can_freq
+ * @param[in] sample uint32_t Desired position of sampling @ref can_samplepoint
+ * @returns true, if finding succesfull.
+ */
+bool can_timing_init(struct can_timing *timing, uint32_t freq, uint32_t sample)
+{
+	uint32_t quantas = rcc_ppre1_frequency / freq;
+
+	/* TODO this is for fixed 75 % - make initial value a computed ! */
+
+	timing->ts1 = 14;
+	timing->ts2 = 5;
+
+	uint32_t tqs = (1 + timing->ts1 + timing->ts2);
+
+	while (quantas % tqs) {
+		/* this timing combination will not generate correct TQ
+		 * Try new, shorter combination */
+		if (tqs * sample > (timing->ts1 + 1) * 0x100) {
+			timing->ts2--;
+		} else {
+			timing->ts1--;
+		}
+
+		if ((timing->ts1 == 0) || (timing->ts2 == 0)) {
+			/* Well no combination can be found ! Make it invalid */
+			timing->ts1 = 0;
+			timing->ts2 = 0;
+			timing->brp = 0;
+			timing->sjw = 0;
+			return false;
+		}
+
+		tqs = (1 + timing->ts1 + timing->ts2);
+	}
+	timing->brp = quantas / tqs;
+	timing->sjw = (timing->ts2 > 4) ? 4 : timing->ts2;
+
+	return true;
+}
+
+/** \brief
+ *
+ * \param canport uint32_t
+ * \param timing struct can_timing*
+ * \return void
+ *
+ */
+void can_timing_set(uint32_t canport, struct can_timing *timing)
+{
+	CAN_BTR(canport) = (CAN_BTR(canport) &
+		~(CAN_BTR_SJW | CAN_BTR_TS2 | CAN_BTR_TS1 | CAN_BTR_BRP)) |
+		(CAN_BTR_SJW_VAL(timing->sjw) & CAN_BTR_SJW) |
+		(CAN_BTR_TS2_VAL(timing->ts2) & CAN_BTR_TS2) |
+		(CAN_BTR_TS1_VAL(timing->ts1) & CAN_BTR_TS1) |
+		(CAN_BTR_BRP_VAL(timing->brp) & CAN_BTR_BRP);
+}
+
+
+/** \brief
+ *
+ * \param timing struct can_timing*
+ * \return uint32_t
+ *
+ */
+uint32_t can_timing_getfreq(struct can_timing *timing)
+{
+	uint32_t N = 1 + timing->ts1 + timing->ts2;
+	return rcc_ppre1_frequency / (N * timing->brp);
 }
 
 /**@}*/
