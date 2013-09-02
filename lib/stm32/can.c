@@ -74,6 +74,16 @@ void can_reset(uint32_t canport)
 	}
 }
 
+bool can_mode_isinit(uint32_t canport)
+{
+	return (CAN_MSR(canport) & CAN_MSR_INAK) != 0;
+}
+
+bool can_mode_issleep(uint32_t canport)
+{
+	return (CAN_MSR(canport) & CAN_MSR_SLAK) != 0;
+}
+
 /*----------------------------------------------------------------------------*/
 /** @brief CAN Init
  *
@@ -97,7 +107,6 @@ int can_init(uint32_t canport, bool ttcm, bool abom, bool awum, bool nart,
 	     uint32_t brp, bool loopback, bool silent)
 {
 	volatile uint32_t wait_ack;
-	int ret = 0;
 
 	/* Exit from sleep mode. */
 	CAN_MCR(canport) &= ~CAN_MCR_SLEEP;
@@ -107,11 +116,10 @@ int can_init(uint32_t canport, bool ttcm, bool abom, bool awum, bool nart,
 
 	/* Wait for acknowledge. */
 	wait_ack = CAN_MSR_INAK_TIMEOUT;
-	while ((--wait_ack) &&
-		((CAN_MSR(canport) & CAN_MSR_INAK) != CAN_MSR_INAK));
+	while ((--wait_ack) && !can_mode_isinit(canport));
 
 	/* Check the acknowledge. */
-	if ((CAN_MSR(canport) & CAN_MSR_INAK) != CAN_MSR_INAK) {
+	if (!can_mode_isinit(canport)) {
 		return 1;
 	}
 
@@ -169,21 +177,20 @@ int can_init(uint32_t canport, bool ttcm, bool abom, bool awum, bool nart,
 
 	/* Set bit timings. */
 	CAN_BTR(canport) |= sjw | ts2 | ts1 |
-		((brp - 1ul) & CAN_BTR_BRP_MASK);
+		(CAN_BTR_BRP_VAL(brp) & CAN_BTR_BRP);
 
 	/* Request initialization "leave". */
 	CAN_MCR(canport) &= ~CAN_MCR_INRQ;
 
 	/* Wait for acknowledge. */
 	wait_ack = CAN_MSR_INAK_TIMEOUT;
-	while ((--wait_ack) &&
-	       ((CAN_MSR(canport) & CAN_MSR_INAK) == CAN_MSR_INAK));
+	while ((--wait_ack) && can_mode_isinit(canport));
 
-	if ((CAN_MSR(canport) & CAN_MSR_INAK) == CAN_MSR_INAK) {
-		ret = 1;
+	if (can_mode_isinit(canport)) {
+		return 1;
 	}
 
-	return ret;
+	return 0;
 }
 
 /*----------------------------------------------------------------------------*/
@@ -370,31 +377,22 @@ int can_transmit(uint32_t canport, uint32_t id, bool ext, bool rtr,
 	} tdlxr, tdhxr;
 
 	/* Check which transmit mailbox is empty if any. */
-	if ((CAN_TSR(canport) & CAN_TSR_TME0) == CAN_TSR_TME0) {
-		ret = 0;
-		mailbox = CAN_MBOX0;
-	} else if ((CAN_TSR(canport) & CAN_TSR_TME1) == CAN_TSR_TME1) {
-		ret = 1;
-		mailbox = CAN_MBOX1;
-	} else if ((CAN_TSR(canport) & CAN_TSR_TME2) == CAN_TSR_TME2) {
-		ret = 2;
-		mailbox = CAN_MBOX2;
-	} else {
-		ret = -1;
-	}
+	ret = can_mailbox_getempty(canport);
 
 	/* If we have no empty mailbox return with an error. */
 	if (ret == -1) {
 		return ret;
 	}
 
+	mailbox = CAN_MBOX(ret);
+
 	if (ext) {
 		/* Set extended ID. */
-		CAN_TIxR(canport, mailbox) = (id << CAN_TIxR_EXID_SHIFT) |
+		CAN_TIxR(canport, mailbox) = CAN_TIxR_EXID_VAL(id) |
 			CAN_TIxR_IDE;
 	} else {
 		/* Set standard ID. */
-		CAN_TIxR(canport, mailbox) = id << CAN_TIxR_STID_SHIFT;
+		CAN_TIxR(canport, mailbox) = CAN_TIxR_STID_VAL(id);
 	}
 
 	/* Set/clear remote transmission request bit. */
@@ -403,8 +401,8 @@ int can_transmit(uint32_t canport, uint32_t id, bool ext, bool rtr,
 	}
 
 	/* Set the DLC. */
-	CAN_TDTxR(canport, mailbox) &= ~CAN_TDTxR_DLC_MASK;
-	CAN_TDTxR(canport, mailbox) |= (length & CAN_TDTxR_DLC_MASK);
+	CAN_TDTxR(canport, mailbox) = (length & CAN_TDTxR_DLC) |
+		(CAN_TDTxR(canport, mailbox) & ~CAN_TDTxR_DLC);
 
 	switch (length) {
 	case 8:
@@ -453,11 +451,7 @@ int can_transmit(uint32_t canport, uint32_t id, bool ext, bool rtr,
  */
 void can_fifo_release(uint32_t canport, uint8_t fifo)
 {
-	if (fifo == 0) {
-		CAN_RF0R(canport) |= CAN_RF1R_RFOM1;
-	} else {
-		CAN_RF1R(canport) |= CAN_RF1R_RFOM1;
-	}
+	CAN_RFxR(canport, fifo) |= CAN_RF1R_RFOM1;
 }
 
 /*----------------------------------------------------------------------------*/
@@ -483,21 +477,20 @@ void can_receive(uint32_t canport, uint8_t fifo, bool release, uint32_t *id,
 		uint8_t data8[4];
 		uint32_t data32;
 	} rdlxr, rdhxr;
-	const uint32_t fifoid_array[2] = {CAN_FIFO0, CAN_FIFO1};
 
-	fifo_id = fifoid_array[fifo];
+	fifo_id = CAN_FIFO(fifo);
 
 	/* Get type of CAN ID and CAN ID. */
 	if (CAN_RIxR(canport, fifo_id) & CAN_RIxR_IDE) {
 		*ext = true;
 		/* Get extended CAN ID. */
-		*id = (CAN_RIxR(canport, fifo_id) >> CAN_RIxR_EXID_SHIFT) &
-			CAN_RIxR_EXID_MASK;
+		*id = (CAN_RIxR(canport, fifo_id) & CAN_RIxR_EXID) >>
+			CAN_RIxR_EXID_SHIFT;
 	} else {
 		*ext = false;
 		/* Get standard CAN ID. */
-		*id = (CAN_RIxR(canport, fifo_id) >> CAN_RIxR_STID_SHIFT) &
-			CAN_RIxR_STID_MASK;
+		*id = (CAN_RIxR(canport, fifo_id) & CAN_RIxR_STID) >>
+			CAN_RIxR_STID_SHIFT;
 	}
 
 	/* Get remote transmit flag. */
@@ -508,8 +501,8 @@ void can_receive(uint32_t canport, uint8_t fifo, bool release, uint32_t *id,
 	}
 
 	/* Get filter match ID. */
-	*fmi = ((CAN_RDTxR(canport, fifo_id) & CAN_RDTxR_FMI_MASK) >>
-		CAN_RDTxR_FMI_SHIFT);
+	*fmi = (CAN_RDTxR(canport, fifo_id) & CAN_RDTxR_FMI) >>
+		CAN_RDTxR_FMI_SHIFT;
 
 	/* Get data length. */
 	*length = CAN_RDTxR(canport, fifo_id) & CAN_RDTxR_DLC_MASK;
@@ -549,6 +542,18 @@ void can_receive(uint32_t canport, uint8_t fifo, bool release, uint32_t *id,
 bool can_available_mailbox(uint32_t canport)
 {
 	return CAN_TSR(canport) & (CAN_TSR_TME0 | CAN_TSR_TME1 | CAN_TSR_TME2);
+}
+
+int32_t can_mailbox_getempty(uint32_t canport)
+{
+	int32_t i = 0;
+	for (i = 0; i < 3; i++) {
+		if ((CAN_TSR(canport) & CAN_TSR_TME(i)) != 0) {
+			return i;
+		}
+	}
+	/* no free mailbox found */
+	return -1;
 }
 
 /**@}*/
