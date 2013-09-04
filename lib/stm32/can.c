@@ -558,7 +558,7 @@ void can_filter_id_list_32bit_init(uint32_t canport, uint32_t nr,
 /** @brief CAN Enable IRQ
  *
  * @param[in] canport Unsigned int32. CAN block register base @ref can_reg_base.
- * @param[in] irq Unsigned int32. IRQ bit(s).
+ * @param[in] irq Unsigned int32. IRQ bit(s). (mask of CAN_IER_xxx values)
  */
 void can_enable_irq(uint32_t canport, uint32_t irq)
 {
@@ -569,12 +569,151 @@ void can_enable_irq(uint32_t canport, uint32_t irq)
 /** @brief CAN Disable IRQ
  *
  * @param[in] canport Unsigned int32. CAN block register base @ref can_reg_base.
- * @param[in] irq Unsigned int32. IRQ bit(s).
+ * @param[in] irq Unsigned int32. IRQ bit(s). (mask of CAN_IER_xxx values)
  */
 void can_disable_irq(uint32_t canport, uint32_t irq)
 {
 	CAN_IER(canport) &= ~irq;
 }
+
+/*----------------------------------------------------------------------------*/
+/** @brief CAN Test, if status IRQ is pending
+ *
+ * @param[in] canport Unsigned int32. CAN block register base @ref can_reg_base.
+ * @param[in] irq Unsigned int32. (mask of CAN_IER_SLKIE, CAN_IER_WKUIE,
+ *    CAN_IER_ERRIE values)
+ * @returns true, if any of the interrupt in the mask is pending
+ */
+bool can_status_irq_is_pending(uint32_t canport, uint32_t irq)
+{
+	uint32_t msr = CAN_MSR(canport);
+	bool pending = false;
+
+	pending |= (irq & CAN_IER_SLKIE) && (msr & CAN_MSR_SLAKI);
+	pending |= (irq & CAN_IER_WKUIE) && (msr & CAN_MSR_WKUI);
+	pending |= (irq & CAN_IER_ERRIE) && (msr & CAN_MSR_ERRI);
+
+	return pending;
+}
+
+/*----------------------------------------------------------------------------*/
+/** @brief CAN Test, if error IRQ is pending
+ *
+ * @param[in] canport Unsigned int32. CAN block register base @ref can_reg_base.
+ * @param[in] irq Unsigned int32. (mask of CAN_IER_LECIE, CAN_IER_BOFIE,
+ *    CAN_IER_EPVIE, CAN_IER_EWGIE values)
+ * @returns true, if any of the interrupt in the mask is pending
+ */
+bool can_error_irq_is_pending(uint32_t canport, uint32_t irq)
+{
+	uint32_t esr = CAN_ESR(canport);
+	bool pending = false;
+
+	pending |= (irq & CAN_IER_LECIE) && (esr & CAN_ESR_LEC);
+	pending |= (irq & CAN_IER_BOFIE) && (esr & CAN_ESR_BOFF);
+	pending |= (irq & CAN_IER_EPVIE) && (esr & CAN_ESR_EPVF);
+	pending |= (irq & CAN_IER_EWGIE) && (esr & CAN_ESR_EWGF);
+
+	return pending;
+}
+
+
+/*----------------------------------------------------------------------------*/
+/** @brief CAN Test, if FIFO IRQ is pending
+ *
+ * @param[in] canport Unsigned int32. CAN block register base @ref can_reg_base.
+ * @param[in] irq Unsigned int32. (mask of CAN_IER_FMPIE(x), CAN_IER_FFIE(x) and
+ *    CAN_IER_FOVIE(x) values)
+ * @returns true, if any of the interrupt in the mask is pending
+ */
+bool can_fifo_irq_is_pending(uint32_t canport, uint32_t irq)
+{
+	uint32_t rf0 = CAN_RF0R(canport);
+	uint32_t rf1 = CAN_RF1R(canport);
+	bool pending = false;
+
+	/* FIFO 0 */
+	pending |= (irq & CAN_IER_FMPIE0) && (rf0 & CAN_RF0R_FMP0);
+	pending |= (irq & CAN_IER_FFIE0)  && (rf0 & CAN_RF0R_FULL0);
+	pending |= (irq & CAN_IER_FOVIE0) && (rf0 & CAN_RF0R_FOVR0);
+
+	/* FIFO 1 */
+	pending |= (irq & CAN_IER_FMPIE1) && (rf1 & CAN_RF1R_FMP1);
+	pending |= (irq & CAN_IER_FFIE1)  && (rf1 & CAN_RF1R_FULL1);
+	pending |= (irq & CAN_IER_FOVIE1) && (rf1 & CAN_RF1R_FOVR1);
+
+	return pending;
+}
+
+/*----------------------------------------------------------------------------*/
+/** @brief CAN Clear the pending status IRQ and return if any was pending
+ *
+ * @param[in] canport Unsigned int32. CAN block register base @ref can_reg_base.
+ * @param[in] irq Unsigned int32. (mask of CAN_IER_SLKIE, CAN_IER_WKUIE,
+ *    CAN_IER_ERRIE values)
+ * @returns true, if any of the interrupt in the mask was pending
+ */
+bool can_status_irq_clear_pending(uint32_t canport, uint32_t irq)
+{
+	uint32_t msr = CAN_MSR(canport);
+	bool pending = false;
+
+	if ((irq & CAN_IER_SLKIE) && (msr & CAN_MSR_SLAKI)) {
+		CAN_MSR(canport) = CAN_MSR_SLAKI;
+		pending = true;
+	}
+
+	if ((irq & CAN_IER_WKUIE) && (msr & CAN_MSR_WKUI)) {
+		CAN_MSR(canport) = CAN_MSR_WKUI;
+		pending = true;
+	}
+
+	if ((irq & CAN_IER_ERRIE) && (msr & CAN_MSR_ERRI)) {
+		CAN_MSR(canport) = CAN_MSR_ERRI;
+		pending = true;
+	}
+
+	return pending;
+}
+
+/*----------------------------------------------------------------------------*/
+/** @brief CAN Clear the pending FIFO IRQ and return if any was pending
+ *
+ * @param[in] canport Unsigned int32. CAN block register base @ref can_reg_base.
+ * @param[in] irq Unsigned int32. (mask of CAN_IER_FFIE(x), CAN_IER_FOVIE(x)
+ *    values)
+ * @returns true, if any of the interrupt in the mask is pending
+ */
+bool can_fifo_irq_clear_pending(uint32_t canport, uint32_t irq)
+{
+	uint32_t rf0 = CAN_RF0R(canport);
+	uint32_t rf1 = CAN_RF1R(canport);
+	bool pending = false;
+
+	/* FIFO 0 */
+	if ((irq & CAN_IER_FFIE0)  && (rf0 & CAN_RF0R_FULL0)) {
+		CAN_RF0R(canport) = CAN_RF0R_FULL0;
+		pending = true;
+	}
+	if ((irq & CAN_IER_FOVIE0) && (rf0 & CAN_RF0R_FOVR0)) {
+		CAN_RF0R(canport) = CAN_RF0R_FOVR0;
+		pending = true;
+	}
+
+	/* FIFO 1 */
+	if ((irq & CAN_IER_FFIE1)  && (rf1 & CAN_RF1R_FULL1)) {
+		CAN_RF1R(canport) = CAN_RF1R_FULL1;
+		pending = true;
+	}
+	if ((irq & CAN_IER_FOVIE1) && (rf1 & CAN_RF1R_FOVR1)) {
+		CAN_RF1R(canport) = CAN_RF1R_FOVR1;
+		pending = true;
+	}
+
+	return pending;
+}
+
+
 
 /*----------------------------------------------------------------------------*/
 /** @brief CAN Transmit Message
