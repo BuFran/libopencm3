@@ -1,4 +1,15 @@
-/* This provides unification of code over STM32F subfamilies */
+/** @defgroup can_file CAN
+ *
+ * @ingroup STM32F1xx
+ *
+ * @brief <b>libopencm3 STM32F1xx CAN Controller</b>
+ *
+ * @version 1.0.0
+ *
+ * @date 4 September 2013
+ *
+ * LGPL License Terms @ref lgpl_license
+ */
 
 /*
  * This file is part of the libopencm3 project.
@@ -16,11 +27,5 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with this library.  If not, see <http://www.gnu.org/licenses/>.
  */
-#if defined(STM32F1)
-#       include <libopencm3/stm32/f1/can.h>
-#elif defined(STM32F4)
-#       include <libopencm3/stm32/f4/can.h>
-#else
-#       error "stm32 family not defined."
-#endif
 
+#include <libopencm3/stm32/can.h>
