@@ -74,28 +74,72 @@ void can_reset(uint32_t canport)
 	}
 }
 
+/*----------------------------------------------------------------------------*/
+/** @brief Enter the core into the Init mode
+ *
+ * In this mode, the CAN communication is stopped, and all initialization
+ * operation commands are allowed.
+ *
+ * Note there can be some delay between set Initialization mode and mode set
+ * due to clock domains synchronization. User must test, if the init mode has
+ * been set before any init commands.
+ *
+ * @param[in] canport Unsigned int32. CAN block register base @ref can_reg_base.
+ */
 void can_enter_init_mode(uint32_t canport)
 {
 	CAN_MCR(canport) |= CAN_MCR_INRQ;
 }
 
+/*----------------------------------------------------------------------------*/
+/** @brief Leave the core from the Init mode
+ *
+ * In this mode, All initialization operation commands are prohibited, the bus
+ * is in the operational state, and messages can be received and transmitted.
+ *
+ * Note there can be some delay between exit Initialization mode and mode exit
+ * due to clock domains synchronization. User must test, if the init mode has
+ * been exit before any message transmission.
+ *
+ * @param[in] canport Unsigned int32. CAN block register base @ref can_reg_base.
+ */
 void can_leave_init_mode(uint32_t canport)
 {
 	CAN_MCR(canport) &= ~CAN_MCR_INRQ;
 }
 
+/*----------------------------------------------------------------------------*/
+/** @brief Enter the core into the Sleep mode
+ *
+ * @param[in] canport Unsigned int32. CAN block register base @ref can_reg_base.
+ */
 void can_enter_sleep_mode(uint32_t canport)
 {
 	CAN_MCR(canport) |= CAN_MCR_SLEEP;
 }
 
+/*----------------------------------------------------------------------------*/
+/** @brief Leave the core from the Sleep mode
+ *
+ * @param[in] canport Unsigned int32. CAN block register base @ref can_reg_base.
+ */
 void can_leave_sleep_mode(uint32_t canport)
 {
 	CAN_MCR(canport) &= ~CAN_MCR_SLEEP;
 }
 
-
-
+/*----------------------------------------------------------------------------*/
+/** @brief Enter the core into the Init mode
+ *
+ * In this mode, the CAN communication is stopped, and all initialization
+ * operation commands are allowed.
+ *
+ * This blocking call automatically waits for the finish of the operation and
+ * the user can send any init command safely after this call.
+ *
+ * @param[in] canport Unsigned int32. CAN block register base @ref can_reg_base.
+ * @returns true on success, false on failure
+ */
 bool can_enter_init_mode_blocking(uint32_t canport)
 {
 	volatile uint32_t wait_ack;
@@ -110,6 +154,18 @@ bool can_enter_init_mode_blocking(uint32_t canport)
 	return can_is_init_mode(canport);
 }
 
+/*----------------------------------------------------------------------------*/
+/** @brief Exit the core from the Init mode
+ *
+ * In this mode, all initialization operation commands are prohibited, the bus
+ * is in the operational state, and messages can be received and transmitted.
+ *
+ * This blocking call automatically waits for the finish of the operation and
+ * the user can send any init command safely after this call.
+ *
+ * @param[in] canport Unsigned int32. CAN block register base @ref can_reg_base.
+ * @returns true on success, false on failure
+ */
 bool can_leave_init_mode_blocking(uint32_t canport)
 {
 	volatile uint32_t wait_ack;
@@ -124,17 +180,39 @@ bool can_leave_init_mode_blocking(uint32_t canport)
 	return !can_is_init_mode(canport);
 }
 
-
+/*----------------------------------------------------------------------------*/
+/** @brief Is the core in Init mode ?
+ *
+ * @param[in] canport Unsigned int32. CAN block register base @ref can_reg_base.
+ * @returns true, if the core is in the initialization mode
+ */
 bool can_is_init_mode(uint32_t canport)
 {
 	return (CAN_MSR(canport) & CAN_MSR_INAK) != 0;
 }
 
+/*----------------------------------------------------------------------------*/
+/** @brief Is the core in Sleep mode ?
+ *
+ * @param[in] canport Unsigned int32. CAN block register base @ref can_reg_base.
+ * @returns true, if the core is in the sleeping mode
+ */
 bool can_is_sleep_mode(uint32_t canport)
 {
 	return (CAN_MSR(canport) & CAN_MSR_SLAK) != 0;
 }
 
+/*----------------------------------------------------------------------------*/
+/** @brief Init mode - Time Triggered Communication
+ *
+ * If enabled, a two-byte timestamp is added at the end to each transmitted
+ * frame
+ *
+ * This function can be called only in the Init mode.
+ *
+ * @param[in] canport Unsigned int32. CAN block register base @ref can_reg_base.
+ * @param[in] enable bool The desired state of the mode.
+ */
 void can_mode_set_timetriggered(uint32_t canport, bool enable)
 {
 	if (enable) {
@@ -144,6 +222,17 @@ void can_mode_set_timetriggered(uint32_t canport, bool enable)
 	}
 }
 
+/*----------------------------------------------------------------------------*/
+/** @brief Init mode - Automatic Bus-Off
+ *
+ * If enabled, The bus-off state is automatically acknowledged, and restored on
+ * the correct bus operation.
+ *
+ * This function can be called only in the Init mode.
+ *
+ * @param[in] canport Unsigned int32. CAN block register base @ref can_reg_base.
+ * @param[in] enable bool The desired state of the mode.
+ */
 void can_mode_set_autobusoff(uint32_t canport, bool enable)
 {
 	if (enable) {
@@ -153,6 +242,16 @@ void can_mode_set_autobusoff(uint32_t canport, bool enable)
 	}
 }
 
+/*----------------------------------------------------------------------------*/
+/** @brief Init mode - Automatic wake-up
+ *
+ * If enabled, The core will be automatically woken in presence of bus activity.
+ *
+ * This function can be called only in the Init mode.
+ *
+ * @param[in] canport Unsigned int32. CAN block register base @ref can_reg_base.
+ * @param[in] enable bool The desired state of the mode.
+ */
 void can_mode_set_autowakeup(uint32_t canport, bool enable)
 {
 	if (enable) {
@@ -162,6 +261,18 @@ void can_mode_set_autowakeup(uint32_t canport, bool enable)
 	}
 }
 
+/*----------------------------------------------------------------------------*/
+/** @brief Init mode - No retransmit frames
+ *
+ * If enabled, The core will not retransmit frames, that will cause error on the
+ * bus (collision errors...). Otherwise, the frames will be retransmitted on the
+ * next bus idle state.
+ *
+ * This function can be called only in the Init mode.
+ *
+ * @param[in] canport Unsigned int32. CAN block register base @ref can_reg_base.
+ * @param[in] enable bool The desired state of the mode.
+ */
 void can_mode_set_noretransmit(uint32_t canport, bool enable)
 {
 	if (enable) {
@@ -171,6 +282,16 @@ void can_mode_set_noretransmit(uint32_t canport, bool enable)
 	}
 }
 
+/*----------------------------------------------------------------------------*/
+/** @brief Init mode - RX FIFO Locked
+ *
+ * If enabled,
+ *
+ * This function can be called only in the Init mode.
+ *
+ * @param[in] canport Unsigned int32. CAN block register base @ref can_reg_base.
+ * @param[in] enable bool The desired state of the mode.
+ */
 void can_mode_set_rxfifo_locked(uint32_t canport, bool enable)
 {
 	if (enable) {
@@ -180,6 +301,19 @@ void can_mode_set_rxfifo_locked(uint32_t canport, bool enable)
 	}
 }
 
+/*----------------------------------------------------------------------------*/
+/** @brief Init mode - TX frame priority
+ *
+ * If enabled, the order of transmitted frames on the bus is computed from the
+ * frame ID (lower ID has higher priority and be served first). Otherwise, the
+ * transmitted frames are sent exactly in order they was written to the transmit
+ * FIFO.
+ *
+ * This function can be called only in the Init mode.
+ *
+ * @param[in] canport Unsigned int32. CAN block register base @ref can_reg_base.
+ * @param[in] enable bool The desired state of the mode.
+ */
 void can_mode_set_txframe_priority(uint32_t canport, bool enable)
 {
 	if (enable) {
@@ -189,6 +323,17 @@ void can_mode_set_txframe_priority(uint32_t canport, bool enable)
 	}
 }
 
+/*----------------------------------------------------------------------------*/
+/** @brief Init mode - Debug set silent mode
+ *
+ * If enabled, the TX port is disconnected from the bus, and the transmitted
+ * frames are not propagated to the external bus.
+ *
+ * This function can be called only in the Init mode.
+ *
+ * @param[in] canport Unsigned int32. CAN block register base @ref can_reg_base.
+ * @param[in] enable bool The desired state of the mode.
+ */
 void can_mode_set_silent(uint32_t canport, bool enable)
 {
 	if (enable) {
@@ -198,6 +343,17 @@ void can_mode_set_silent(uint32_t canport, bool enable)
 	}
 }
 
+/*----------------------------------------------------------------------------*/
+/** @brief Init mode - Debug set loopback mode
+ *
+ * If enabled, the RX port from the bus is disabled, and the CAN core is
+ * receiving only transmitted frames.
+ *
+ * This function can be called only in the Init mode.
+ *
+ * @param[in] canport Unsigned int32. CAN block register base @ref can_reg_base.
+ * @param[in] enable bool The desired state of the mode.
+ */
 void can_mode_set_loopback(uint32_t canport, bool enable)
 {
 	if (enable) {
@@ -223,6 +379,8 @@ void can_mode_set_loopback(uint32_t canport, bool enable)
  * @param[in] ts1 Unsigned int32. Time segment 1 time quanta width.
  * @param[in] ts2 Unsigned int32. Time segment 2 time quanta width.
  * @param[in] brp Unsigned int32. Baud rate prescaler.
+ * @param[in] loopback bool. Debug loopback mode (no receive from bus).
+ * @param[in] silent bool. Debug silent mode (no transmit to bus).
  * @returns int 0 on success, 1 on initialization failure.
  */
 int can_init(uint32_t canport, bool ttcm, bool abom, bool awum, bool nart,
@@ -603,11 +761,24 @@ void can_receive(uint32_t canport, uint8_t fifo, bool release, uint32_t *id,
 	}
 }
 
+/*----------------------------------------------------------------------------*/
+/** @brief Test, if there is any free transmit mailbox
+ *
+ * @param[in] canport Unsigned int32. CAN block register base @ref can_reg_base.
+ * @returns  true, if there is any free transmit mailbox.
+ */
 bool can_available_mailbox(uint32_t canport)
 {
 	return CAN_TSR(canport) & (CAN_TSR_TME0 | CAN_TSR_TME1 | CAN_TSR_TME2);
 }
 
+/*----------------------------------------------------------------------------*/
+/** @brief Get index of the empty transmit mailbox
+ *
+ * @param[in] canport Unsigned int32. CAN block register base @ref can_reg_base.
+ * @returns int32_t 0..2: The index of the empty transmit mailbox.
+ *		   -1 if there is no empty transmit mailbox
+ */
 int32_t can_get_empty_mailbox(uint32_t canport)
 {
 	int32_t i = 0;
@@ -620,22 +791,25 @@ int32_t can_get_empty_mailbox(uint32_t canport)
 	return -1;
 }
 
+/*----------------------------------------------------------------------------*/
+/** @brief Get the actual error code
+ *
+ * @param[in] canport Unsigned int32. CAN block register base @ref can_reg_base.
+ * @returns The actual error code.
+ */
 uint32_t can_errorcode(uint32_t canport)
 {
 	return CAN_ESR(canport) & CAN_ESR_LEC;
 }
 
 
-
+/*----------------------------------------------------------------------------*/
 /** @brief Initialize timing structure
  *
  * Compute the values in the timing structure to match the desired communication
  * speed and sample point.
  *
- * Sample point is a fraction of 8-bit value. Most useful positions are listed:
- *
- * 50% 0x80
- * 75% 0xC0
+ * Sample point is a fraction of 8-bit value. Ie. 255 is 100% 128 is 50% ...
  *
  * @param[inout] timing struct can_timing* The timing structure
  * @param[in] freq uint32_t Desired communication speed in bps @ref can_freq
@@ -679,12 +853,11 @@ bool can_timing_init(struct can_timing *timing, uint32_t freq, uint32_t sample)
 	return true;
 }
 
-/** \brief
+/*----------------------------------------------------------------------------*/
+/** @brief Set the timing to the CAN core
  *
- * \param canport uint32_t
- * \param timing struct can_timing*
- * \return void
- *
+ * @param[in] canport Unsigned int32. CAN block register base @ref can_reg_base.
+ * \param[in] timing struct can_timing* The timing structure to set
  */
 void can_timing_set(uint32_t canport, struct can_timing *timing)
 {
@@ -696,12 +869,11 @@ void can_timing_set(uint32_t canport, struct can_timing *timing)
 		(CAN_BTR_BRP_VAL(timing->brp) & CAN_BTR_BRP);
 }
 
-
-/** \brief
+/*----------------------------------------------------------------------------*/
+/** @brief Compute the frequency that is defined in the timing.
  *
- * \param timing struct can_timing*
- * \return uint32_t
- *
+ * @param[in] timing struct can_timing* The timing structure to get info about.
+ * @returns uint32_t Frequency of the CAN bus in Hz.
  */
 uint32_t can_timing_getfreq(struct can_timing *timing)
 {
