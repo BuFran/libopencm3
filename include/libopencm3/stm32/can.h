@@ -794,6 +794,12 @@ void can_filter_id_list_32bit_init(uint32_t canport, uint32_t nr, uint32_t id1,
 /* irq operations */
 void can_enable_irq(uint32_t canport, uint32_t irq);
 void can_disable_irq(uint32_t canport, uint32_t irq);
+bool can_status_irq_is_pending(uint32_t canport, uint32_t irq);
+bool can_error_irq_is_pending(uint32_t canport, uint32_t irq);
+bool can_fifo_irq_is_pending(uint32_t canport, uint32_t irq);
+bool can_transmit_irq_is_pending(uint32_t canport, uint32_t irq);
+bool can_status_irq_clear_pending(uint32_t canport, uint32_t irq);
+bool can_fifo_irq_clear_pending(uint32_t canport, uint32_t irq);
 
 int can_transmit(uint32_t canport, uint32_t id, bool ext, bool rtr,
 		 uint8_t length, uint8_t *data);
