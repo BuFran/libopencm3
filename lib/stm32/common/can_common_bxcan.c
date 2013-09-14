@@ -581,6 +581,119 @@ void can_filter_id_list_32bit_init(uint32_t canport, uint32_t nr,
 	can_filter_init(canport, nr, true, true, id1, id2, fifo, enable);
 }
 
+
+
+/*
+ * can_filter_init_enter(CAN1);
+ * can_filter_set_list32(CAN1, 1, 0, &COB_SYNC, &COB_TIME);
+ * can_filter_set_list16(CAN1, 2, 0, &COB_TPDO0, &COB_TPDO1, &COB_TPDO2, &COB_TPDO3);
+ * can_filter_set_mask32(CAN1, 4, 1, &CAN_ADDR_ALL, &CAN_ADDR_ALL);
+ * can_filter_disable(CAN1, 4);
+ * can_filter_init_leave(CAN1);
+ */
+
+void can_filter_init_enter(uint32_t canport)
+{
+	CAN_FMR(canport) |= CAN_FMR_FINIT;
+}
+
+void can_filter_init_leave(uint32_t canport)
+{
+	CAN_FMR(canport) &= ~CAN_FMR_FINIT;
+}
+
+void can_filter_enable(uint32_t canport, uint32_t nr)
+{
+	CAN_FA1R(canport) |= (1 << nr);
+}
+
+void can_filter_disable(uint32_t canport, uint32_t nr)
+{
+	CAN_FA1R(canport) &= ~(1 << nr);
+}
+
+
+#define CANFILT32(addr)				\
+	CAN_RIxR_STID_VAL(addr->cobid) |	\
+	CAN_RIxR_EXID_VAL(addr->extid) |	\
+	(addr->ext ? CAN_RIxR_IDE : 0) |	\
+	(addr->rtr ? CAN_RIxR_RTR : 0)
+
+#define CANFILT16(addr)			\
+	((addr->cobid << 6) |		\
+	 (addr->extid >> 15) |		\
+	 (addr->ext ? 0x08 : 0) |	\
+	 (addr->rtr ? 0x10 : 0))
+
+
+static inline
+void can_filter_set(const uint32_t canport, const uint32_t nr,
+	const uint8_t fifo, const bool mask, const bool b32,
+	const uint32_t fir1, uint32_t fir2)
+{
+	uint32_t bit = (1 << nr);
+
+	CAN_FA1R(canport) &= ~bit;	/* Deactivate the filter. */
+	if (b32) {
+		CAN_FS1R(canport) |= bit;	/* 32-bit */
+	} else {
+		CAN_FS1R(canport) &= ~bit;	/* 16-bit */
+	}
+
+	if (mask) {
+		CAN_FM1R(canport) &= ~bit;	/* ID mask mode. */
+	} else {
+		CAN_FM1R(canport) |= bit;	/* ID list mode. */
+	}
+
+	CAN_FiR1(canport, nr) = fir1;
+	CAN_FiR2(canport, nr) = fir2;
+
+	/* Select FIFO0 or FIFO1 as filter assignement. */
+	if (fifo) {
+		CAN_FFA1R(canport) |= bit;  /* FIFO1 */
+	} else {
+		CAN_FFA1R(canport) &= ~bit; /* FIFO0 */
+	}
+
+	CAN_FA1R(canport) |= bit; 	/* Activate filter. */
+}
+
+void can_filter_set_list32(uint32_t canport, uint32_t nr, uint8_t fifo,
+	struct can_addr *addr1, struct can_addr *addr2)
+{
+	can_filter_set(canport, nr, fifo, false, true,
+			CANFILT32(addr1),
+			CANFILT32(addr2));
+}
+
+void can_filter_set_list16(uint32_t canport, uint32_t nr, uint8_t fifo,
+	struct can_addr *addr1, struct can_addr *addr2,
+	struct can_addr *addr3, struct can_addr *addr4)
+{
+	can_filter_set(canport, nr, fifo, false, false,
+			CANFILT16(addr1) | (CANFILT16(addr2) << 16),
+			CANFILT16(addr3) | (CANFILT16(addr4) << 16));
+}
+
+void can_filter_set_mask32(uint32_t canport, uint32_t nr, uint8_t fifo,
+	struct can_addr *addr, struct can_addr *mask)
+{
+	can_filter_set(canport, nr, fifo, true, true,
+			CANFILT32(addr),
+			CANFILT32(mask));
+}
+
+void can_filter_set_mask16(uint32_t canport, uint32_t nr, uint8_t fifo,
+	struct can_addr *addr1, struct can_addr *mask1,
+	struct can_addr *addr2, struct can_addr *mask2)
+{
+	can_filter_set(canport, nr, fifo, true, false,
+			CANFILT16(addr1) | (CANFILT16(mask1) << 16),
+			CANFILT16(addr2) | (CANFILT16(mask2) << 16));
+}
+
+
 /*----------------------------------------------------------------------------*/
 /** @brief CAN Enable IRQ
  *
@@ -746,13 +859,11 @@ bool can_fifo_irq_clear_pending(uint32_t canport, uint32_t irq)
  * @param[in] canport Unsigned int32. CAN block register base @ref can_reg_base.
  * @param[in] mailbox Unsined int32 CAN mailbox id 0..2
  * @param[in] addr struct can_addr. Message object identifier
- * @param[in] rtr bool. Request transmit?
  * @param[in] data Unsigned int8[]. Message payload data.
  * @param[in] length Unsigned int8. Message payload length.
- * @returns true if successfully transmitted
  */
-bool can_transmit_mbox(uint32_t canport, uint32_t mailbox, const struct can_addr *addr,
-		bool rtr, uint8_t *data, uint8_t length)
+void can_transmit_mbox(uint32_t canport, uint32_t mailbox,
+		const struct can_addr *addr, uint8_t *data, uint8_t length)
 {
 	union {
 		uint8_t data8[4];
@@ -761,22 +872,12 @@ bool can_transmit_mbox(uint32_t canport, uint32_t mailbox, const struct can_addr
 
 	mailbox = CAN_MBOX(mailbox);
 
-	if (addr->ext) {
-		/* Set extended ID. */
-		CAN_TIxR(canport, mailbox) =
-			CAN_TIxR_STID_VAL(addr->cobid) |
-			CAN_TIxR_EXID_VAL(addr->extid) |
-			CAN_TIxR_IDE;
-	} else {
-		/* Set standard ID. */
-		CAN_TIxR(canport, mailbox) =
-			CAN_TIxR_STID_VAL(addr->cobid);
-	}
-
-	/* Set/clear remote transmission request bit. */
-	if (rtr) {
-		CAN_TIxR(canport, mailbox) |= CAN_TIxR_RTR; /* Set */
-	}
+	/* Set the ID */
+	CAN_TIxR(canport, mailbox) =
+		CAN_TIxR_STID_VAL(addr->cobid) |
+		CAN_TIxR_EXID_VAL(addr->extid) |
+		(addr->ext ? CAN_TIxR_IDE : 0) |
+		(addr->rtr ? CAN_TIxR_RTR : 0);
 
 	/* Set the DLC. */
 	CAN_TDTxR(canport, mailbox) = (length & CAN_TDTxR_DLC) |
@@ -817,8 +918,6 @@ bool can_transmit_mbox(uint32_t canport, uint32_t mailbox, const struct can_addr
 
 	/* Request transmission. */
 	CAN_TIxR(canport, mailbox) |= CAN_TIxR_TXRQ;
-
-	return true;
 }
 
 /*----------------------------------------------------------------------------*/
@@ -826,14 +925,13 @@ bool can_transmit_mbox(uint32_t canport, uint32_t mailbox, const struct can_addr
  *
  * @param[in] canport Unsigned int32. CAN block register base @ref can_reg_base.
  * @param[in] addr struct can_addr. Message object identifier
- * @param[in] rtr bool. Request transmit?
  * @param[in] length Unsigned int8. Message payload length.
  * @param[in] data Unsigned int8[]. Message payload data.
  * @returns int 0, 1 or 2 on success and depending on which outgoing mailbox got
  * selected. -1 if no mailbox was available and no transmission got queued.
  */
-int can_transmit(uint32_t canport, const struct can_addr *addr, bool rtr,
-		 uint8_t *data, uint8_t length)
+int can_transmit(uint32_t canport, const struct can_addr *addr, uint8_t *data,
+		uint8_t length)
 {
 	uint32_t mailbox = 0;
 
@@ -845,7 +943,7 @@ int can_transmit(uint32_t canport, const struct can_addr *addr, bool rtr,
 	mailbox = can_get_empty_mailbox(canport);
 
 	/* Transmit message to found mailbox */
-	can_transmit_mbox(canport, mailbox, addr, rtr, data, length);
+	can_transmit_mbox(canport, mailbox, addr, data, length);
 
 	return mailbox;
 }
@@ -875,7 +973,7 @@ void can_fifo_release(uint32_t canport, uint8_t fifo)
  * @param[out] length Unsigned int8 pointer. Length of message payload.
  */
 void can_receive(uint32_t canport, uint8_t fifo, bool release,
-		 struct can_addr *addr, bool *rtr, uint32_t *fmi, uint8_t *data,
+		 struct can_addr *addr, uint32_t *fmi, uint8_t *data,
 		 uint8_t *length)
 {
 	uint32_t fifo_id = 0;
@@ -896,7 +994,7 @@ void can_receive(uint32_t canport, uint8_t fifo, bool release,
 		       (CAN_RIxR_EXID & ~CAN_RIxR_STID)) >> CAN_RIxR_EXID_SHIFT;
 
 	/* Get remote transmit flag. */
-	*rtr = (CAN_RIxR(canport, fifo_id) & CAN_RIxR_RTR) != 0;
+	addr->rtr = (CAN_RIxR(canport, fifo_id) & CAN_RIxR_RTR) != 0;
 
 	/* Get filter match ID. */
 	*fmi = (CAN_RDTxR(canport, fifo_id) & CAN_RDTxR_FMI) >>

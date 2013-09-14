@@ -562,12 +562,14 @@
 #define CAN_RIxR_STID_SHIFT		21
 #define CAN_RIxR_STID_MASK		(0x7FF)
 #define CAN_RIxR_STID			(0x7FF << CAN_RIxR_STID_SHIFT)
+#define CAN_RIxR_STID_VAL(x)		(x << CAN_RIxR_STID_SHIFT)
 
 
 /* EXID[15:0]: Extended identifier */
 #define CAN_RIxR_EXID_SHIFT		3
 #define CAN_RIxR_EXID_MASK		(0x1FFFFFFF)
 #define CAN_RIxR_EXID			(0x1FFFFFFF << CAN_RIxR_EXID_SHIFT)
+#define CAN_RIxR_EXID_VAL(x)		(x << CAN_RIxR_EXID_SHIFT)
 
 /* IDE: Identifier extension */
 #define CAN_RIxR_IDE			(1 << 2)
@@ -751,6 +753,7 @@ struct can_addr {
 	uint16_t cobid; /* 11-bit standard object identifier */
 	uint32_t extid; /* 18-bit extension object identifier */
 	bool ext; /* true, if identifier is extended */
+	bool rtr; /* true, if this is remote frame */
 };
 
 #define CAN_ADDR_STD(id)	{ .cobid = (id), .ext = false }
@@ -803,6 +806,23 @@ void can_filter_id_list_16bit_init(uint32_t canport, uint32_t nr, uint16_t id1,
 void can_filter_id_list_32bit_init(uint32_t canport, uint32_t nr, uint32_t id1,
 				   uint32_t id2, uint32_t fifo, bool enable);
 
+void can_filter_init_enter(uint32_t canport);
+void can_filter_init_leave(uint32_t canport);
+void can_filter_enable(uint32_t canport, uint32_t nr);
+void can_filter_disable(uint32_t canport, uint32_t nr);
+
+void can_filter_set_list32(uint32_t canport, uint32_t nr, uint8_t fifo,
+	struct can_addr *addr1, struct can_addr *addr2);
+void can_filter_set_list16(uint32_t canport, uint32_t nr, uint8_t fifo,
+	struct can_addr *addr1, struct can_addr *addr2,
+	struct can_addr *addr3, struct can_addr *addr4);
+void can_filter_set_mask32(uint32_t canport, uint32_t nr, uint8_t fifo,
+	struct can_addr *addr, struct can_addr *mask);
+void can_filter_set_mask16(uint32_t canport, uint32_t nr, uint8_t fifo,
+	struct can_addr *addr1, struct can_addr *mask1,
+	struct can_addr *addr2, struct can_addr *mask2);
+
+
 /* irq operations */
 void can_enable_irq(uint32_t canport, uint32_t irq);
 void can_disable_irq(uint32_t canport, uint32_t irq);
@@ -813,15 +833,14 @@ bool can_transmit_irq_is_pending(uint32_t canport, uint32_t irq);
 bool can_status_irq_clear_pending(uint32_t canport, uint32_t irq);
 bool can_fifo_irq_clear_pending(uint32_t canport, uint32_t irq);
 
-bool can_transmit_mbox(uint32_t canport, uint32_t mailbox,
-		const struct can_addr *addr, bool rtr, uint8_t *data,
+void can_transmit_mbox(uint32_t canport, uint32_t mailbox,
+		const struct can_addr *addr, uint8_t *data, uint8_t length);
+
+int can_transmit(uint32_t canport, const struct can_addr *addr, uint8_t *data,
 		uint8_t length);
 
-int can_transmit(uint32_t canport, const struct can_addr *addr, bool rtr,
-		 uint8_t *data, uint8_t length);
-
 void can_receive(uint32_t canport, uint8_t fifo, bool release,
-		 struct can_addr *addr,	bool *rtr, uint32_t *fmi, uint8_t *data,
+		 struct can_addr *addr,	uint32_t *fmi, uint8_t *data,
 		 uint8_t *length);
 
 void can_fifo_release(uint32_t canport, uint8_t fifo);
