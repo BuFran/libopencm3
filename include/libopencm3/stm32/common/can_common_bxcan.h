@@ -130,7 +130,7 @@
 #define CAN_RDH1R(can_base)		CAN_RDHxR(can_base, CAN_FIFO1)
 
 /* --- CAN filter registers ------------------------------------------------- */
-
+/* Not available on CAN2 !*/
 /* CAN filter master register (CAN_FMR) */
 #define CAN_FMR(can_base)		MMIO32(can_base + 0x200)
 
@@ -621,7 +621,8 @@
  * CAN2SB[5:0]: CAN2 start bank
  * (only on connectivity line devices otherwise reserved)
  */
-#define CAN_FMR_CAN2SB_SHIFT		15
+// #define CAN_FMR_CAN2SB_SHIFT		15
+#define CAN_FMR_CAN2SB_SHIFT		8
 #define CAN_FMR_CAN2SB_MASK		(0x3F << CAN_FMR_CAN2SB_SHIFT)
 #define CAN_FMR_CAN2SB			(0x3F << CAN_FMR_CAN2SB_SHIFT)
 
@@ -774,7 +775,7 @@ int can_init(uint32_t canport, bool ttcm, bool abom, bool awum, bool nart,
 	     bool rflm, bool txfp, uint32_t sjw, uint32_t ts1, uint32_t ts2,
 	     uint32_t brp, bool loopback, bool silent);
 
-
+void can_filter_set_slave_start(uint32_t canport, uint32_t nr);
 void can_filter_init(uint32_t canport, uint32_t nr, bool scale_32bit,
 		     bool id_list_mode, uint32_t fr1, uint32_t fr2,
 		     uint32_t fifo, bool enable);
@@ -798,6 +799,9 @@ bool can_fifo_irq_is_pending(uint32_t canport, uint32_t irq);
 bool can_transmit_irq_is_pending(uint32_t canport, uint32_t irq);
 bool can_status_irq_clear_pending(uint32_t canport, uint32_t irq);
 bool can_fifo_irq_clear_pending(uint32_t canport, uint32_t irq);
+
+bool can_transmit_mbox(uint32_t canport, uint32_t mailbox, uint32_t id,
+		bool ext, bool rtr, uint8_t *data, uint8_t length);
 
 int can_transmit(uint32_t canport, uint32_t id, bool ext, bool rtr,
 		 uint8_t length, uint8_t *data);

@@ -407,6 +407,19 @@ int can_init(uint32_t canport, bool ttcm, bool abom, bool awum, bool nart,
 	return can_leave_init_mode_blocking(canport) ? 0 : 1;
 }
 
+/*----------------------------------------------------------------------------*/
+/** @brief CAN Filter Set slave index
+ *
+ * Initialize first filter index for the slave peripheral.
+ *
+ * @param[in] canport Unsigned int32. CAN block register base @ref can_reg_base.
+ * @param[in] nr Unsigned int32. ID number of the first filter of slave block.
+ */
+void can_filter_set_slave_start(uint32_t canport, uint32_t nr)
+{
+	CAN_FMR(canport) = (CAN_FMR(canport) & ~CAN_FMR_CAN2SB) |
+			   (nr << CAN_FMR_CAN2SB_SHIFT);
+}
 
 
 /*----------------------------------------------------------------------------*/
@@ -707,39 +720,27 @@ bool can_fifo_irq_clear_pending(uint32_t canport, uint32_t irq)
 	return pending;
 }
 
-
-
 /*----------------------------------------------------------------------------*/
-/** @brief CAN Transmit Message
+/** @brief CAN Transmit Message using specified mailbox
  *
  * @param[in] canport Unsigned int32. CAN block register base @ref can_reg_base.
+ * @param[in] mailbox Unsined int32 CAN mailbox id 0..2
  * @param[in] id Unsigned int32. Message ID.
  * @param[in] ext bool. Extended message ID?
  * @param[in] rtr bool. Request transmit?
- * @param[in] length Unsigned int8. Message payload length.
  * @param[in] data Unsigned int8[]. Message payload data.
- * @returns int 0, 1 or 2 on success and depending on which outgoing mailbox got
- * selected. -1 if no mailbox was available and no transmission got queued.
+ * @param[in] length Unsigned int8. Message payload length.
+ * @returns true if successfully transmitted
  */
-int can_transmit(uint32_t canport, uint32_t id, bool ext, bool rtr,
-		 uint8_t length, uint8_t *data)
+bool can_transmit_mbox(uint32_t canport, uint32_t mailbox, uint32_t id,
+		bool ext, bool rtr, uint8_t *data, uint8_t length)
 {
-	int ret = 0;
-	uint32_t mailbox = 0;
 	union {
 		uint8_t data8[4];
 		uint32_t data32;
 	} tdlxr, tdhxr;
 
-	/* Check which transmit mailbox is empty if any. */
-	ret = can_get_empty_mailbox(canport);
-
-	/* If we have no empty mailbox return with an error. */
-	if (ret == -1) {
-		return ret;
-	}
-
-	mailbox = CAN_MBOX(ret);
+	mailbox = CAN_MBOX(mailbox);
 
 	if (ext) {
 		/* Set extended ID. */
@@ -795,7 +796,37 @@ int can_transmit(uint32_t canport, uint32_t id, bool ext, bool rtr,
 	/* Request transmission. */
 	CAN_TIxR(canport, mailbox) |= CAN_TIxR_TXRQ;
 
-	return ret;
+	return true;
+}
+
+/*----------------------------------------------------------------------------*/
+/** @brief CAN Transmit Message
+ *
+ * @param[in] canport Unsigned int32. CAN block register base @ref can_reg_base.
+ * @param[in] id Unsigned int32. Message ID.
+ * @param[in] ext bool. Extended message ID?
+ * @param[in] rtr bool. Request transmit?
+ * @param[in] length Unsigned int8. Message payload length.
+ * @param[in] data Unsigned int8[]. Message payload data.
+ * @returns int 0, 1 or 2 on success and depending on which outgoing mailbox got
+ * selected. -1 if no mailbox was available and no transmission got queued.
+ */
+int can_transmit(uint32_t canport, uint32_t id, bool ext, bool rtr,
+		 uint8_t length, uint8_t *data)
+{
+	uint32_t mailbox = 0;
+
+	if (!can_available_mailbox(canport)) {
+		return -1;
+	}
+
+	/* Check which transmit mailbox is empty */
+	mailbox = can_get_empty_mailbox(canport);
+
+	/* Transmit message to found mailbox */
+	can_transmit_mbox(canport, mailbox, id, ext, rtr, data, length);
+
+	return mailbox;
 }
 
 /*---------------------------------------------------------------------------*/
@@ -906,22 +937,14 @@ bool can_available_mailbox(uint32_t canport)
 }
 
 /*----------------------------------------------------------------------------*/
-/** @brief Get index of the empty transmit mailbox
+/** @brief Get index of the empty or lowest priority transmit mailbox
  *
  * @param[in] canport Unsigned int32. CAN block register base @ref can_reg_base.
  * @returns int32_t 0..2: The index of the empty transmit mailbox.
- *		   -1 if there is no empty transmit mailbox
  */
 int32_t can_get_empty_mailbox(uint32_t canport)
 {
-	int32_t i = 0;
-	for (i = 0; i < 3; i++) {
-		if ((CAN_TSR(canport) & CAN_TSR_TME(i)) != 0) {
-			return i;
-		}
-	}
-	/* no free mailbox found */
-	return -1;
+	return (CAN_TSR(canport) & CAN_TSR_CODE) >> CAN_TSR_CODE_SHIFT;
 }
 
 /*----------------------------------------------------------------------------*/
