@@ -745,6 +745,18 @@ struct can_timing {
 #define CAN_SAMPLE_50		(1 * 0x100 / 2)
 /**@}*/
 
+
+/* Addresses are in format (cobid) or (cobid:extid) */
+struct can_addr {
+	uint16_t cobid; /* 11-bit standard object identifier */
+	uint32_t extid; /* 18-bit extension object identifier */
+	bool ext; /* true, if identifier is extended */
+};
+
+#define CAN_ADDR_STD(id)	{ .cobid = (id), .ext = false }
+#define CAN_ADDR_EXT(id, ext)	{ .cobid = (id), .ext = true, .extid = (ext) }
+
+
 BEGIN_DECLS
 
 void can_reset(uint32_t canport);
@@ -768,8 +780,9 @@ void can_mode_set_autowakeup(uint32_t canport, bool enable);
 void can_mode_set_noretransmit(uint32_t canport, bool enable);
 void can_mode_set_rxfifo_locked(uint32_t canport, bool enable);
 void can_mode_set_txframe_priority(uint32_t canport, bool enable);
-void can_mode_set_silent(uint32_t canport, bool enable);
-void can_mode_set_loopback(uint32_t canport, bool enable);
+void can_debug_set_silent(uint32_t canport, bool enable);
+void can_debug_set_loopback(uint32_t canport, bool enable);
+void can_debug_set_freeze(uint32_t canport, bool enable);
 
 int can_init(uint32_t canport, bool ttcm, bool abom, bool awum, bool nart,
 	     bool rflm, bool txfp, uint32_t sjw, uint32_t ts1, uint32_t ts2,
@@ -800,14 +813,16 @@ bool can_transmit_irq_is_pending(uint32_t canport, uint32_t irq);
 bool can_status_irq_clear_pending(uint32_t canport, uint32_t irq);
 bool can_fifo_irq_clear_pending(uint32_t canport, uint32_t irq);
 
-bool can_transmit_mbox(uint32_t canport, uint32_t mailbox, uint32_t id,
-		bool ext, bool rtr, uint8_t *data, uint8_t length);
+bool can_transmit_mbox(uint32_t canport, uint32_t mailbox,
+		const struct can_addr *addr, bool rtr, uint8_t *data,
+		uint8_t length);
 
-int can_transmit(uint32_t canport, uint32_t id, bool ext, bool rtr,
-		 uint8_t length, uint8_t *data);
-void can_receive(uint32_t canport, uint8_t fifo, bool release, uint32_t *id,
-		 bool *ext, bool *rtr, uint32_t *fmi, uint8_t *length,
-		 uint8_t *data);
+int can_transmit(uint32_t canport, const struct can_addr *addr, bool rtr,
+		 uint8_t *data, uint8_t length);
+
+void can_receive(uint32_t canport, uint8_t fifo, bool release,
+		 struct can_addr *addr,	bool *rtr, uint32_t *fmi, uint8_t *data,
+		 uint8_t *length);
 
 void can_fifo_release(uint32_t canport, uint8_t fifo);
 
