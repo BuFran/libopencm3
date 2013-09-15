@@ -775,27 +775,72 @@ struct can_timing {
 #define CAN_MOBID_RTR		(1 << 1)
 
 
-
+/*----------------------------------------------------------------------------*/
+/** @brief Declare standard frame
+ *
+ * @param[in] std Unsigned int32. Message standard identifier
+ * @returns Unsigned int 32. Message Object Identifier
+ */
 #define CAN_ID_STDID(std)			\
 	(CAN_MOBID_STD_VAL(std))
 
+/*----------------------------------------------------------------------------*/
+/** @brief Declare Extended frame
+ *
+ * @param[in] std Unsigned int32. Message standard identifier
+ * @param[in] ext Unsigned int32. Message extension identifier
+ * @returns Unsigned int 32. Message Object Identifier
+ */
 #define CAN_ID_EXTID(std, ext)			\
 	(CAN_MOBID_STD_VAL(std) | CAN_MOBID_EXT_VAL(ext) | CAN_MOBID_IDE)
 
+/*----------------------------------------------------------------------------*/
+/** @brief Declare Standard remote frame
+ *
+ * @param[in] std Unsigned int32. Message standard identifier
+ * @returns Unsigned int 32. Message Object Identifier
+ */
 #define CAN_ID_STDID_REMOTE(std)		\
 	(CAN_MOBID_STD_VAL(std) | CAN_MOBID_RTR)
 
+/*----------------------------------------------------------------------------*/
+/** @brief Declare Extended remote frame
+ *
+ * @param[in] std Unsigned int32. Message standard identifier
+ * @param[in] ext Unsigned int32. Message extension identifier
+ * @returns Unsigned int 32. Message Object Identifier
+ */
 #define CAN_ID_EXTID_REMOTE(std, ext)		\
 	(CAN_MOBID_STD_VAL(std) | CAN_MOBID_EXT_VAL(ext) | CAN_MOBID_IDE | \
 	CAN_MOBID_RTR)
 
-#define CAN_ID_ISEXT(val)	((val & CAN_MOBID_IDE) != 0)
+/*----------------------------------------------------------------------------*/
+/** @brief Test, if MOB-ID is extended frame
+ *
+ * @param[in] mobid Unsigned int32. Message object identifier
+ */
+#define CAN_ID_ISEXT(mobid)	((mobid & CAN_MOBID_IDE) != 0)
 
-#define CAN_ID_ISREMOTE(val)	((val & CAN_MOBID_RTR) != 0)
+/*----------------------------------------------------------------------------*/
+/** @brief Test, if MOB-ID is indicating remote frame
+ *
+ * @param[in] mobid Unsigned int32. Message object identifier
+ */
+#define CAN_ID_ISREMOTE(mobid)	((mobid & CAN_MOBID_RTR) != 0)
 
-#define CAN_ID_GETSTD(val)	((val & CAN_MOBID_STD) >> CAN_MOBID_STD_SHIFT)
+/*----------------------------------------------------------------------------*/
+/** @brief Get standard ID from the MOB-ID
+ *
+ * @param[in] mobid Unsigned int32. Message object identifier
+ */
+#define CAN_ID_GETSTD(mobid)	((mobid & CAN_MOBID_STD) >> CAN_MOBID_STD_SHIFT)
 
-#define CAN_ID_GETEXT(val)	((val & CAN_MOBID_EXT) >> CAN_MOBID_EXT_SHIFT)
+/*----------------------------------------------------------------------------*/
+/** @brief Get extension ID from the MOB-ID
+ *
+ * @param[in] mobid Unsigned int32. Message object identifier
+ */
+#define CAN_ID_GETEXT(mobid)	((mobid & CAN_MOBID_EXT) >> CAN_MOBID_EXT_SHIFT)
 
 
 /**@}*/ /* addrogroup can_addr_api */
@@ -914,6 +959,8 @@ bool can_timing_init(struct can_timing *timing, uint32_t freq, uint32_t sample);
 uint32_t can_timing_getfreq(struct can_timing *timing);
 
 END_DECLS
+
+/**@}*/
 
 #endif
 /** @cond */

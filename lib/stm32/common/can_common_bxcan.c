@@ -427,13 +427,6 @@ int can_init(uint32_t canport, bool ttcm, bool abom, bool awum, bool nart,
 	return can_leave_init_mode_blocking(canport) ? 0 : 1;
 }
 
-
-
-
-
-
-
-
 /*----------------------------------------------------------------------------*/
 /** @brief CAN Enable IRQ
  *
@@ -632,6 +625,12 @@ int32_t can_mailbox_get_lowprio(uint32_t canport)
 	return (CAN_TSR(canport) & CAN_TSR_CODE) >> CAN_TSR_CODE_SHIFT;
 }
 
+/*----------------------------------------------------------------------------*/
+/** @brief Get the timestamp of the transmitted packet
+ *
+ * @param[in] canport Unsigned int32. CAN block register base @ref can_reg_base.
+ * @param[in] mailbox Unsined int32. CAN mailbox id 0..2
+ */
 uint16_t can_mailbox_get_timestamp(uint32_t canport, uint32_t mailbox)
 {
 	return (CAN_TDTxR(canport, mailbox) & CAN_TDTxR_TIME) >>
@@ -696,6 +695,8 @@ void can_mailbox_write_data(uint32_t canport, uint32_t mailbox, uint8_t *data,
 /** @brief Set the Message object ID for transmit
  *
  * @param[in] canport Unsigned int32. CAN block register base @ref can_reg_base.
+ * @param[in] mailbox Unsined int32 CAN mailbox id 0..2
+ * @param[in] mobid Unsined int32 Message Object ID
  */
 void can_mailbox_set_mobid(uint32_t canport, uint32_t mailbox,
 			      uint32_t mobid)
@@ -703,6 +704,17 @@ void can_mailbox_set_mobid(uint32_t canport, uint32_t mailbox,
 	CAN_TIxR(canport, mailbox) = mobid & ~1U;
 }
 
+/*----------------------------------------------------------------------------*/
+/** @brief Transmit global time at the end of message
+ *
+ * If enabled, the current timestamp is transmitted at last two bytes of
+ * transmitted message. Note that the message must be configured to the
+ * transmission length of 8 bytes
+ *
+ * @param[in] canport Unsigned int32. CAN block register base @ref can_reg_base.
+ * @param[in] mailbox Unsined int32. CAN mailbox id 0..2
+ * @param[in] enable bool. Desired state of the function
+ */
 void can_mailbox_set_tx_time(uint32_t canport, uint32_t mailbox, bool enable)
 {
 	if (enable) {
@@ -712,7 +724,12 @@ void can_mailbox_set_tx_time(uint32_t canport, uint32_t mailbox, bool enable)
 	}
 }
 
-
+/*----------------------------------------------------------------------------*/
+/** @brief Start the transmission on the mailbox
+ *
+ * @param[in] canport Unsigned int32. CAN block register base @ref can_reg_base.
+ * @param[in] mailbox Unsined int32 CAN mailbox id 0..2
+ */
 void can_mailbox_transmit(uint32_t canport, uint32_t mailbox)
 {
 	CAN_TIxR(canport, mailbox) |= CAN_TIxR_TXRQ;
@@ -722,7 +739,7 @@ void can_mailbox_transmit(uint32_t canport, uint32_t mailbox)
 /** @brief CAN Transmit Message
  *
  * @param[in] canport Unsigned int32. CAN block register base @ref can_reg_base.
- * @param[in] addr struct can_addr. Message object identifier
+ * @param[in] mobid Unsigned int32. Message object identifier
  * @param[in] length Unsigned int8. Message payload length.
  * @param[in] data Unsigned int8[]. Message payload data.
  * @returns int 0, 1 or 2 on success and depending on which outgoing mailbox got
@@ -812,17 +829,35 @@ void can_fifo_read_data(uint32_t canport, uint8_t fifo, uint8_t *data,
 	data[7] = rdhxr.data8[3];
 }
 
+/*----------------------------------------------------------------------------*/
+/** @brief Get the Message object identifier
+ *
+ * @param[in] canport Unsigned int32. CAN block register base @ref can_reg_base.
+ * @param[in] fifo Unsined int32. CAN fifo id 0..1
+ */
 uint32_t can_fifo_get_mobid(uint32_t canport, uint8_t fifo)
 {
 	return CAN_RIxR(canport, fifo) & ~1U;
 }
 
+/*----------------------------------------------------------------------------*/
+/** @brief Get the filter index
+ *
+ * @param[in] canport Unsigned int32. CAN block register base @ref can_reg_base.
+ * @param[in] fifo Unsined int32. CAN fifo id 0..1
+ */
 uint32_t can_fifo_get_filter_id(uint32_t canport, uint8_t fifo)
 {
 	return (CAN_RDTxR(canport, fifo) & CAN_RDTxR_FMI) >>
 			CAN_RDTxR_FMI_SHIFT;
 }
 
+/*----------------------------------------------------------------------------*/
+/** @brief Get the timestamp of the SOF bit of the packet
+ *
+ * @param[in] canport Unsigned int32. CAN block register base @ref can_reg_base.
+ * @param[in] fifo Unsined int32. CAN fifo id 0..1
+ */
 uint16_t can_fifo_get_timestamp(uint32_t canport, uint8_t fifo)
 {
 	return (CAN_RDTxR(canport, fifo) & CAN_RDTxR_TIME) >>
@@ -834,10 +869,8 @@ uint16_t can_fifo_get_timestamp(uint32_t canport, uint8_t fifo)
  *
  * @param[in] canport Unsigned int32. CAN block register base @ref can_reg_base.
  * @param[in] fifo Unsigned int8. FIFO id.
- * @param[in] release bool. Release the FIFO automatically after coping data
- * out.
- * @param[in] addr struct can_addr. Message object identifier
- * @param[out] rtr bool pointer. Request of transmission?
+ * @param[in] release bool. Release the FIFO automatically
+ * @param[in] mobid Unsigned int32. Message object identifier
  * @param[out] fmi Unsigned int32 pointer. ID of the matched filter.
  * @param[out] data Unsigned int8[]. Message payload data.
  * @param[out] length Unsigned int8 pointer. Length of message payload.
@@ -871,10 +904,10 @@ void can_receive(uint32_t canport, uint8_t fifo, bool release, uint32_t *mobid,
  *
  * @code
  * can_filter_init_enter(CAN1);
- * can_filter_set_list32(CAN1, 1, 0, &COB_SYNC, &COB_TIME);
- * can_filter_set_list16(CAN1, 2, 0, &COB_TPDO0, &COB_TPDO1, &COB_TPDO2, &COB_TPDO3);
+ * can_filter_set_list32(CAN1, 1, 0, MOB_SYNC, MCOB_TIME);
+ * can_filter_set_list16(CAN1, 2, 0, MOB_TPDO0, MOB_TPDO1, MOB_TPDO2, MOB_TPDO3);
  * can_filter_disable(CAN1, 3);
- * can_filter_set_mask32(CAN1, 4, 1, &CAN_ADDR_ALL, &CAN_ADDR_ALL);
+ * can_filter_set_mask32(CAN1, 4, 1, CAN_ADDR_ALL, CAN_ADDR_ALL);
  * can_filter_init_leave(CAN1);
  * @endcode
  *
@@ -894,21 +927,43 @@ void can_filter_set_slave_start(uint32_t canport, uint32_t nr)
 			   (nr << CAN_FMR_CAN2SB_SHIFT);
 }
 
+/*----------------------------------------------------------------------------*/
+/** @brief Enter filter initialization mode
+ *
+ * @param[in] canport Unsigned int32. CAN block register base @ref can_reg_base.
+ */
 void can_filter_init_enter(uint32_t canport)
 {
 	CAN_FMR(canport) |= CAN_FMR_FINIT;
 }
 
+/*----------------------------------------------------------------------------*/
+/** @brief Leave the filter initialization mode
+ *
+ * @param[in] canport Unsigned int32. CAN block register base @ref can_reg_base.
+ */
 void can_filter_init_leave(uint32_t canport)
 {
 	CAN_FMR(canport) &= ~CAN_FMR_FINIT;
 }
 
+/*----------------------------------------------------------------------------*/
+/** @brief Enable the filter
+ *
+ * @param[in] canport Unsigned int32. CAN block register base @ref can_reg_base.
+ * @param[in] nr Unsined int32. CAN filter id 0..28
+ */
 void can_filter_enable(uint32_t canport, uint32_t nr)
 {
 	CAN_FA1R(canport) |= (1 << nr);
 }
 
+/*----------------------------------------------------------------------------*/
+/** @brief Disable the filter
+ *
+ * @param[in] canport Unsigned int32. CAN block register base @ref can_reg_base.
+ * @param[in] nr Unsined int32. CAN filter id 0..28
+ */
 void can_filter_disable(uint32_t canport, uint32_t nr)
 {
 	CAN_FA1R(canport) &= ~(1 << nr);
@@ -946,7 +1001,7 @@ void can_filter_set(const uint32_t canport, const uint32_t nr,
 		CAN_FFA1R(canport) &= ~bit; /* FIFO0 */
 	}
 
-	CAN_FA1R(canport) |= bit; 	/* Activate filter. */
+	CAN_FA1R(canport) |= bit;	/* Activate filter. */
 }
 
 #define __CANFILT32(addr)			\
@@ -960,6 +1015,12 @@ void can_filter_set(const uint32_t canport, const uint32_t nr,
 
 /** @endcond private */
 
+/*----------------------------------------------------------------------------*/
+/** @brief
+ *
+ * @param[in] canport Unsigned int32. CAN block register base @ref can_reg_base.
+ * @param[in] nr Unsined int32. CAN filter id 0..28
+ */
 void can_filter_set_list32(uint32_t canport, uint32_t nr, uint8_t fifo,
 	uint32_t mobid1, uint32_t mobid2)
 {
@@ -968,6 +1029,12 @@ void can_filter_set_list32(uint32_t canport, uint32_t nr, uint8_t fifo,
 			__CANFILT32(mobid2));
 }
 
+/*----------------------------------------------------------------------------*/
+/** @brief
+ *
+ * @param[in] canport Unsigned int32. CAN block register base @ref can_reg_base.
+ * @param[in] nr Unsined int32. CAN filter id 0..28
+ */
 void can_filter_set_list16(uint32_t canport, uint32_t nr, uint8_t fifo,
 	uint32_t mobid1, uint32_t mobid2, uint32_t mobid3, uint32_t mobid4)
 {
@@ -976,6 +1043,12 @@ void can_filter_set_list16(uint32_t canport, uint32_t nr, uint8_t fifo,
 			__CANFILT16(mobid3) | (__CANFILT16(mobid4) << 16));
 }
 
+/*----------------------------------------------------------------------------*/
+/** @brief
+ *
+ * @param[in] canport Unsigned int32. CAN block register base @ref can_reg_base.
+ * @param[in] nr Unsined int32. CAN filter id 0..28
+ */
 void can_filter_set_mask32(uint32_t canport, uint32_t nr, uint8_t fifo,
 	uint32_t mobid, uint32_t mask)
 {
@@ -984,6 +1057,12 @@ void can_filter_set_mask32(uint32_t canport, uint32_t nr, uint8_t fifo,
 			__CANFILT32(mask));
 }
 
+/*----------------------------------------------------------------------------*/
+/** @brief
+ *
+ * @param[in] canport Unsigned int32. CAN block register base @ref can_reg_base.
+ * @param[in] nr Unsined int32. CAN filter id 0..28
+ */
 void can_filter_set_mask16(uint32_t canport, uint32_t nr, uint8_t fifo,
 	uint32_t mobid1, uint32_t mask1, uint32_t mobid2, uint32_t mask2)
 {
@@ -1164,7 +1243,7 @@ bool can_timing_init(struct can_timing *timing, uint32_t freq, uint32_t sample)
 /** @brief Set the timing to the CAN core
  *
  * @param[in] canport Unsigned int32. CAN block register base @ref can_reg_base.
- * \param[in] timing struct can_timing* The timing structure to set
+ * @param[in] timing struct can_timing* The timing structure to set
  */
 void can_timing_set(uint32_t canport, struct can_timing *timing)
 {
