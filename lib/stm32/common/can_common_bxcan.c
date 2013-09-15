@@ -427,271 +427,11 @@ int can_init(uint32_t canport, bool ttcm, bool abom, bool awum, bool nart,
 	return can_leave_init_mode_blocking(canport) ? 0 : 1;
 }
 
-/*----------------------------------------------------------------------------*/
-/** @brief CAN Filter Set slave index
- *
- * Initialize first filter index for the slave peripheral.
- *
- * @param[in] canport Unsigned int32. CAN block register base @ref can_reg_base.
- * @param[in] nr Unsigned int32. ID number of the first filter of slave block.
- */
-void can_filter_set_slave_start(uint32_t canport, uint32_t nr)
-{
-	CAN_FMR(canport) = (CAN_FMR(canport) & ~CAN_FMR_CAN2SB) |
-			   (nr << CAN_FMR_CAN2SB_SHIFT);
-}
-
-
-/*----------------------------------------------------------------------------*/
-/** @brief CAN Filter Init
- *
- * Initialize incoming message filter and assign to FIFO.
- *
- * @param[in] canport Unsigned int32. CAN block register base @ref can_reg_base.
- * @param[in] nr Unsigned int32. ID number of the filter.
- * @param[in] scale_32bit bool. 32-bit scale for the filter?
- * @param[in] id_list_mode bool. ID list filter mode?
- * @param[in] fr1 Unsigned int32. First filter register content.
- * @param[in] fr2 Unsigned int32. Second filter register content.
- * @param[in] fifo Unsigned int32. FIFO id.
- * @param[in] enable bool. Enable filter?
- */
-void can_filter_init(uint32_t canport, uint32_t nr, bool scale_32bit,
-		     bool id_list_mode, uint32_t fr1, uint32_t fr2,
-		     uint32_t fifo, bool enable)
-{
-	uint32_t filter_select_bit = 0x00000001 << nr;
-
-	/* Request initialization "enter". */
-	CAN_FMR(canport) |= CAN_FMR_FINIT;
-
-	/* Deactivate the filter. */
-	CAN_FA1R(canport) &= ~filter_select_bit;
-
-	if (scale_32bit) {
-		/* Set 32-bit scale for the filter. */
-		CAN_FS1R(canport) |= filter_select_bit;
-	} else {
-		/* Set 16-bit scale for the filter. */
-		CAN_FS1R(canport) &= ~filter_select_bit;
-	}
-
-	if (id_list_mode) {
-		/* Set filter mode to ID list mode. */
-		CAN_FM1R(canport) |= filter_select_bit;
-	} else {
-		/* Set filter mode to id/mask mode. */
-		CAN_FM1R(canport) &= ~filter_select_bit;
-	}
-
-	/* Set the first filter register. */
-	CAN_FiR1(canport, nr) = fr1;
-
-	/* Set the second filter register. */
-	CAN_FiR2(canport, nr) = fr2;
-
-	/* Select FIFO0 or FIFO1 as filter assignement. */
-	if (fifo) {
-		CAN_FFA1R(canport) |= filter_select_bit;  /* FIFO1 */
-	} else {
-		CAN_FFA1R(canport) &= ~filter_select_bit; /* FIFO0 */
-	}
-
-	if (enable) {
-		CAN_FA1R(canport) |= filter_select_bit; /* Activate filter. */
-	}
-
-	/* Request initialization "leave". */
-	CAN_FMR(canport) &= ~CAN_FMR_FINIT;
-}
-
-/*----------------------------------------------------------------------------*/
-/** @brief CAN Initialize a 16bit Message ID Mask Filter
- *
- * @param[in] canport Unsigned int32. CAN block register base @ref can_reg_base.
- * @param[in] nr Unsigned int32. ID number of the filter.
- * @param[in] id1 Unsigned int16. First message ID to filter.
- * @param[in] mask1 Unsigned int16. First message ID bit mask.
- * @param[in] id2 Unsigned int16. Second message ID to filter.
- * @param[in] mask2 Unsigned int16. Second message ID bit mask.
- * @param[in] fifo Unsigned int32. FIFO id.
- * @param[in] enable bool. Enable filter?
- */
-void can_filter_id_mask_16bit_init(uint32_t canport, uint32_t nr, uint16_t id1,
-				   uint16_t mask1, uint16_t id2,
-				   uint16_t mask2, uint32_t fifo, bool enable)
-{
-	can_filter_init(canport, nr, false, false,
-			((uint32_t)id1 << 16) | (uint32_t)mask1,
-			((uint32_t)id2 << 16) | (uint32_t)mask2, fifo, enable);
-}
-
-/*----------------------------------------------------------------------------*/
-/** @brief CAN Initialize a 32bit Message ID Mask Filter
- *
- * @param[in] canport Unsigned int32. CAN block register base @ref can_reg_base.
- * @param[in] nr Unsigned int32. ID number of the filter.
- * @param[in] id Unsigned int32. Message ID to filter.
- * @param[in] mask Unsigned int32. Message ID bit mask.
- * @param[in] fifo Unsigned int32. FIFO id.
- * @param[in] enable bool. Enable filter?
- */
-void can_filter_id_mask_32bit_init(uint32_t canport, uint32_t nr, uint32_t id,
-				   uint32_t mask, uint32_t fifo, bool enable)
-{
-	can_filter_init(canport, nr, true, false, id, mask, fifo, enable);
-}
-
-/*----------------------------------------------------------------------------*/
-/** @brief CAN Initialize a 16bit Message ID List Filter
- *
- * @param[in] canport Unsigned int32. CAN block register base @ref can_reg_base.
- * @param[in] nr Unsigned int32. ID number of the filter.
- * @param[in] id1 Unsigned int16. First message ID to match.
- * @param[in] id2 Unsigned int16. Second message ID to match.
- * @param[in] id3 Unsigned int16. Third message ID to match.
- * @param[in] id4 Unsigned int16. Fourth message ID to match.
- * @param[in] fifo Unsigned int32. FIFO id.
- * @param[in] enable bool. Enable filter?
- */
-void can_filter_id_list_16bit_init(uint32_t canport, uint32_t nr,
-				   uint16_t id1, uint16_t id2,
-				   uint16_t id3, uint16_t id4,
-				   uint32_t fifo, bool enable)
-{
-	can_filter_init(canport, nr, false, true,
-			((uint32_t)id1 << 16) | (uint32_t)id2,
-			((uint32_t)id3 << 16) | (uint32_t)id4, fifo, enable);
-}
-
-/*----------------------------------------------------------------------------*/
-/** @brief CAN Initialize a 32bit Message ID List Filter
- *
- * @param[in] canport Unsigned int32. CAN block register base @ref can_reg_base.
- * @param[in] nr Unsigned int32. ID number of the filter.
- * @param[in] id1 Unsigned int32. First message ID to match.
- * @param[in] id2 Unsigned int32. Second message ID to match.
- * @param[in] fifo Unsigned int32. FIFO id.
- * @param[in] enable bool. Enable filter?
- */
-void can_filter_id_list_32bit_init(uint32_t canport, uint32_t nr,
-				   uint32_t id1, uint32_t id2,
-				   uint32_t fifo, bool enable)
-{
-	can_filter_init(canport, nr, true, true, id1, id2, fifo, enable);
-}
 
 
 
-/*
- * can_filter_init_enter(CAN1);
- * can_filter_set_list32(CAN1, 1, 0, &COB_SYNC, &COB_TIME);
- * can_filter_set_list16(CAN1, 2, 0, &COB_TPDO0, &COB_TPDO1, &COB_TPDO2, &COB_TPDO3);
- * can_filter_set_mask32(CAN1, 4, 1, &CAN_ADDR_ALL, &CAN_ADDR_ALL);
- * can_filter_disable(CAN1, 4);
- * can_filter_init_leave(CAN1);
- */
-
-void can_filter_init_enter(uint32_t canport)
-{
-	CAN_FMR(canport) |= CAN_FMR_FINIT;
-}
-
-void can_filter_init_leave(uint32_t canport)
-{
-	CAN_FMR(canport) &= ~CAN_FMR_FINIT;
-}
-
-void can_filter_enable(uint32_t canport, uint32_t nr)
-{
-	CAN_FA1R(canport) |= (1 << nr);
-}
-
-void can_filter_disable(uint32_t canport, uint32_t nr)
-{
-	CAN_FA1R(canport) &= ~(1 << nr);
-}
 
 
-#define CANFILT32(addr)				\
-	CAN_RIxR_STID_VAL(addr->cobid) |	\
-	CAN_RIxR_EXID_VAL(addr->extid) |	\
-	(addr->ext ? CAN_RIxR_IDE : 0) |	\
-	(addr->rtr ? CAN_RIxR_RTR : 0)
-
-#define CANFILT16(addr)			\
-	((addr->cobid << 6) |		\
-	 (addr->extid >> 15) |		\
-	 (addr->ext ? 0x08 : 0) |	\
-	 (addr->rtr ? 0x10 : 0))
-
-
-static inline
-void can_filter_set(const uint32_t canport, const uint32_t nr,
-	const uint8_t fifo, const bool mask, const bool b32,
-	const uint32_t fir1, uint32_t fir2)
-{
-	uint32_t bit = (1 << nr);
-
-	CAN_FA1R(canport) &= ~bit;	/* Deactivate the filter. */
-	if (b32) {
-		CAN_FS1R(canport) |= bit;	/* 32-bit */
-	} else {
-		CAN_FS1R(canport) &= ~bit;	/* 16-bit */
-	}
-
-	if (mask) {
-		CAN_FM1R(canport) &= ~bit;	/* ID mask mode. */
-	} else {
-		CAN_FM1R(canport) |= bit;	/* ID list mode. */
-	}
-
-	CAN_FiR1(canport, nr) = fir1;
-	CAN_FiR2(canport, nr) = fir2;
-
-	/* Select FIFO0 or FIFO1 as filter assignement. */
-	if (fifo) {
-		CAN_FFA1R(canport) |= bit;  /* FIFO1 */
-	} else {
-		CAN_FFA1R(canport) &= ~bit; /* FIFO0 */
-	}
-
-	CAN_FA1R(canport) |= bit; 	/* Activate filter. */
-}
-
-void can_filter_set_list32(uint32_t canport, uint32_t nr, uint8_t fifo,
-	struct can_addr *addr1, struct can_addr *addr2)
-{
-	can_filter_set(canport, nr, fifo, false, true,
-			CANFILT32(addr1),
-			CANFILT32(addr2));
-}
-
-void can_filter_set_list16(uint32_t canport, uint32_t nr, uint8_t fifo,
-	struct can_addr *addr1, struct can_addr *addr2,
-	struct can_addr *addr3, struct can_addr *addr4)
-{
-	can_filter_set(canport, nr, fifo, false, false,
-			CANFILT16(addr1) | (CANFILT16(addr2) << 16),
-			CANFILT16(addr3) | (CANFILT16(addr4) << 16));
-}
-
-void can_filter_set_mask32(uint32_t canport, uint32_t nr, uint8_t fifo,
-	struct can_addr *addr, struct can_addr *mask)
-{
-	can_filter_set(canport, nr, fifo, true, true,
-			CANFILT32(addr),
-			CANFILT32(mask));
-}
-
-void can_filter_set_mask16(uint32_t canport, uint32_t nr, uint8_t fifo,
-	struct can_addr *addr1, struct can_addr *mask1,
-	struct can_addr *addr2, struct can_addr *mask2)
-{
-	can_filter_set(canport, nr, fifo, true, false,
-			CANFILT16(addr1) | (CANFILT16(mask1) << 16),
-			CANFILT16(addr2) | (CANFILT16(mask2) << 16));
-}
 
 
 /*----------------------------------------------------------------------------*/
@@ -854,30 +594,65 @@ bool can_fifo_irq_clear_pending(uint32_t canport, uint32_t irq)
 }
 
 /*----------------------------------------------------------------------------*/
-/** @brief CAN Transmit Message using specified mailbox
+/** @brief Get the actual error code
+ *
+ * @param[in] canport Unsigned int32. CAN block register base @ref can_reg_base.
+ * @returns The actual error code.
+ */
+uint32_t can_errorcode(uint32_t canport)
+{
+	return CAN_ESR(canport) & CAN_ESR_LEC;
+}
+
+/******************************************************************************/
+/** @defgroup can_mailbox_api CAN Transmit Mailbox API
+ * @ingroup can_file
+ *
+ *@{*/
+
+/*----------------------------------------------------------------------------*/
+/** @brief Test, if there is any free transmit mailbox
+ *
+ * @param[in] canport Unsigned int32. CAN block register base @ref can_reg_base.
+ * @returns  true, if there is any free transmit mailbox.
+ */
+bool can_mailbox_is_available(uint32_t canport)
+{
+	return CAN_TSR(canport) & (CAN_TSR_TME0 | CAN_TSR_TME1 | CAN_TSR_TME2);
+}
+
+/*----------------------------------------------------------------------------*/
+/** @brief Get index of the empty or lowest priority transmit mailbox
+ *
+ * @param[in] canport Unsigned int32. CAN block register base @ref can_reg_base.
+ * @returns int32_t 0..2: The index of the empty transmit mailbox.
+ */
+int32_t can_mailbox_get_lowprio(uint32_t canport)
+{
+	return (CAN_TSR(canport) & CAN_TSR_CODE) >> CAN_TSR_CODE_SHIFT;
+}
+
+uint16_t can_mailbox_get_timestamp(uint32_t canport, uint32_t mailbox)
+{
+	return (CAN_TDTxR(canport, mailbox) & CAN_TDTxR_TIME) >>
+			CAN_TDTxR_TIME_SHIFT;
+}
+
+/*----------------------------------------------------------------------------*/
+/** @brief CAN Write data to specified mailbox
  *
  * @param[in] canport Unsigned int32. CAN block register base @ref can_reg_base.
  * @param[in] mailbox Unsined int32 CAN mailbox id 0..2
- * @param[in] addr struct can_addr. Message object identifier
  * @param[in] data Unsigned int8[]. Message payload data.
  * @param[in] length Unsigned int8. Message payload length.
  */
-void can_transmit_mbox(uint32_t canport, uint32_t mailbox,
-		const struct can_addr *addr, uint8_t *data, uint8_t length)
+void can_mailbox_write_data(uint32_t canport, uint32_t mailbox, uint8_t *data,
+			    uint8_t length)
 {
 	union {
 		uint8_t data8[4];
 		uint32_t data32;
 	} tdlxr, tdhxr;
-
-	mailbox = CAN_MBOX(mailbox);
-
-	/* Set the ID */
-	CAN_TIxR(canport, mailbox) =
-		CAN_TIxR_STID_VAL(addr->cobid) |
-		CAN_TIxR_EXID_VAL(addr->extid) |
-		(addr->ext ? CAN_TIxR_IDE : 0) |
-		(addr->rtr ? CAN_TIxR_RTR : 0);
 
 	/* Set the DLC. */
 	CAN_TDTxR(canport, mailbox) = (length & CAN_TDTxR_DLC) |
@@ -915,8 +690,31 @@ void can_transmit_mbox(uint32_t canport, uint32_t mailbox,
 
 	CAN_TDLxR(canport, mailbox) = tdlxr.data32;
 	CAN_TDHxR(canport, mailbox) = tdhxr.data32;
+}
 
-	/* Request transmission. */
+/*----------------------------------------------------------------------------*/
+/** @brief Set the Message object ID for transmit
+ *
+ * @param[in] canport Unsigned int32. CAN block register base @ref can_reg_base.
+ */
+void can_mailbox_set_mobid(uint32_t canport, uint32_t mailbox,
+			      uint32_t mobid)
+{
+	CAN_TIxR(canport, mailbox) = mobid & ~1U;
+}
+
+void can_mailbox_set_tx_time(uint32_t canport, uint32_t mailbox, bool enable)
+{
+	if (enable) {
+		CAN_TDTxR(canport, mailbox) |= CAN_TDTxR_TGT;
+	} else {
+		CAN_TDTxR(canport, mailbox) &= ~CAN_TDTxR_TGT;
+	}
+}
+
+
+void can_mailbox_transmit(uint32_t canport, uint32_t mailbox)
+{
 	CAN_TIxR(canport, mailbox) |= CAN_TIxR_TXRQ;
 }
 
@@ -930,26 +728,35 @@ void can_transmit_mbox(uint32_t canport, uint32_t mailbox,
  * @returns int 0, 1 or 2 on success and depending on which outgoing mailbox got
  * selected. -1 if no mailbox was available and no transmission got queued.
  */
-int can_transmit(uint32_t canport, const struct can_addr *addr, uint8_t *data,
+int can_transmit(uint32_t canport, uint32_t mobid, uint8_t *data,
 		uint8_t length)
 {
 	uint32_t mailbox = 0;
 
-	if (!can_available_mailbox(canport)) {
+	if (!can_mailbox_is_available(canport)) {
 		return -1;
 	}
 
 	/* Check which transmit mailbox is empty */
-	mailbox = can_get_empty_mailbox(canport);
+	mailbox = can_mailbox_get_lowprio(canport);
 
 	/* Transmit message to found mailbox */
-	can_transmit_mbox(canport, mailbox, addr, data, length);
+	can_mailbox_set_mobid(canport, mailbox, mobid);
+	can_mailbox_write_data(canport, mailbox, data, length);
+	can_mailbox_transmit(canport, mailbox);
 
 	return mailbox;
 }
+/**@}*/ /* end of can_mailbox_api group */
 
-/*---------------------------------------------------------------------------*/
-/** @brief CAN Release FIFO
+/******************************************************************************/
+/** @defgroup can_fifo_api CAN Receive FIFO API
+ * @ingroup can_file
+ *
+ *@{*/
+
+ /*---------------------------------------------------------------------------*/
+/** @brief CAN FIFO Release
  *
  * @param[in] canport Unsigned int32. CAN block register base @ref can_reg_base.
  * @param[in] fifo Unsigned int8. FIFO id.
@@ -959,55 +766,30 @@ void can_fifo_release(uint32_t canport, uint8_t fifo)
 	CAN_RFxR(canport, fifo) |= CAN_RF1R_RFOM1;
 }
 
-/*----------------------------------------------------------------------------*/
-/** @brief CAN Receive Message
+/*---------------------------------------------------------------------------*/
+/** @brief CAN FIFO Read data
  *
  * @param[in] canport Unsigned int32. CAN block register base @ref can_reg_base.
  * @param[in] fifo Unsigned int8. FIFO id.
- * @param[in] release bool. Release the FIFO automatically after coping data
- * out.
- * @param[in] addr struct can_addr. Message object identifier
- * @param[out] rtr bool pointer. Request of transmission?
- * @param[out] fmi Unsigned int32 pointer. ID of the matched filter.
  * @param[out] data Unsigned int8[]. Message payload data.
  * @param[out] length Unsigned int8 pointer. Length of message payload.
  */
-void can_receive(uint32_t canport, uint8_t fifo, bool release,
-		 struct can_addr *addr, uint32_t *fmi, uint8_t *data,
-		 uint8_t *length)
+void can_fifo_read_data(uint32_t canport, uint8_t fifo, uint8_t *data,
+			uint8_t *length)
 {
-	uint32_t fifo_id = 0;
 	union {
 		uint8_t data8[4];
 		uint32_t data32;
 	} rdlxr, rdhxr;
 
-	fifo_id = CAN_FIFO(fifo);
-
-	/* Get type of CAN ID and CAN ID. */
-	addr->ext = (CAN_RIxR(canport, fifo_id) & CAN_RIxR_IDE) != 0;
-	/* Get standard CAN ID. */
-	addr->cobid = (CAN_RIxR(canport, fifo_id) & CAN_RIxR_STID) >>
-			CAN_RIxR_STID_SHIFT;
-	/* Get extended CAN ID, copy only extension bits */
-	addr->extid = (CAN_RIxR(canport, fifo_id) &
-		       (CAN_RIxR_EXID & ~CAN_RIxR_STID)) >> CAN_RIxR_EXID_SHIFT;
-
-	/* Get remote transmit flag. */
-	addr->rtr = (CAN_RIxR(canport, fifo_id) & CAN_RIxR_RTR) != 0;
-
-	/* Get filter match ID. */
-	*fmi = (CAN_RDTxR(canport, fifo_id) & CAN_RDTxR_FMI) >>
-		CAN_RDTxR_FMI_SHIFT;
-
 	/* Get data length. */
-	*length = CAN_RDTxR(canport, fifo_id) & CAN_RDTxR_DLC_MASK;
+	*length = CAN_RDTxR(canport, fifo) & CAN_RDTxR_DLC_MASK;
 	/* accelerate reception by copying the CAN data from the controller
 	 * memory to the fast internal RAM
 	 */
 
-	rdlxr.data32 = CAN_RDLxR(canport, fifo_id);
-	rdhxr.data32 = CAN_RDHxR(canport, fifo_id);
+	rdlxr.data32 = CAN_RDLxR(canport, fifo);
+	rdhxr.data32 = CAN_RDHxR(canport, fifo);
 	/* */
 	/* Get data.
 	 * Byte wise copy is needed because we do not know the alignment
@@ -1028,46 +810,305 @@ void can_receive(uint32_t canport, uint8_t fifo, bool release,
 	data[5] = rdhxr.data8[1];
 	data[6] = rdhxr.data8[2];
 	data[7] = rdhxr.data8[3];
+}
 
-	/* Release the FIFO. */
+uint32_t can_fifo_get_mobid(uint32_t canport, uint8_t fifo)
+{
+	return CAN_RIxR(canport, fifo) & ~1U;
+}
+
+uint32_t can_fifo_get_filter_id(uint32_t canport, uint8_t fifo)
+{
+	return (CAN_RDTxR(canport, fifo) & CAN_RDTxR_FMI) >>
+			CAN_RDTxR_FMI_SHIFT;
+}
+
+uint16_t can_fifo_get_timestamp(uint32_t canport, uint8_t fifo)
+{
+	return (CAN_RDTxR(canport, fifo) & CAN_RDTxR_TIME) >>
+			CAN_RDTxR_TIME_SHIFT;
+}
+
+/*----------------------------------------------------------------------------*/
+/** @brief CAN Receive Message
+ *
+ * @param[in] canport Unsigned int32. CAN block register base @ref can_reg_base.
+ * @param[in] fifo Unsigned int8. FIFO id.
+ * @param[in] release bool. Release the FIFO automatically after coping data
+ * out.
+ * @param[in] addr struct can_addr. Message object identifier
+ * @param[out] rtr bool pointer. Request of transmission?
+ * @param[out] fmi Unsigned int32 pointer. ID of the matched filter.
+ * @param[out] data Unsigned int8[]. Message payload data.
+ * @param[out] length Unsigned int8 pointer. Length of message payload.
+ */
+void can_receive(uint32_t canport, uint8_t fifo, bool release, uint32_t *mobid,
+		 uint32_t *fmi, uint8_t *data, uint8_t *length)
+{
+	*mobid = can_fifo_get_mobid(canport, fifo);
+	*fmi = can_fifo_get_filter_id(canport, fifo);
+	can_fifo_read_data(canport, fifo, data, length);
+
 	if (release) {
 		can_fifo_release(canport, fifo);
 	}
 }
 
-/*----------------------------------------------------------------------------*/
-/** @brief Test, if there is any free transmit mailbox
+/**@}*/ /* end of can_fifo_api group */
+
+/******************************************************************************/
+/** @defgroup can_filter_api CAN Filter manipulation
+ * @ingroup can_file
+ *
+ * @note There can be specified in the parameter canport only CAN1 value. CAN2
+ * is slave and has no filters available. The index of first acceptance filter
+ * of the CAN2 device must be set by call to can_filter_set_slave_start.
+ *
+ * @note On STM32F4, the filter setup must be done in the CAN initialization
+ * mode. On STM32F1, from the examples seems, that this isn't needed.
+ *
+ * Usage:
+ *
+ * @code
+ * can_filter_init_enter(CAN1);
+ * can_filter_set_list32(CAN1, 1, 0, &COB_SYNC, &COB_TIME);
+ * can_filter_set_list16(CAN1, 2, 0, &COB_TPDO0, &COB_TPDO1, &COB_TPDO2, &COB_TPDO3);
+ * can_filter_disable(CAN1, 3);
+ * can_filter_set_mask32(CAN1, 4, 1, &CAN_ADDR_ALL, &CAN_ADDR_ALL);
+ * can_filter_init_leave(CAN1);
+ * @endcode
+ *
+ *@{*/
+
+ /*----------------------------------------------------------------------------*/
+/** @brief CAN Filter Set slave index
+ *
+ * Initialize first filter index for the slave peripheral.
  *
  * @param[in] canport Unsigned int32. CAN block register base @ref can_reg_base.
- * @returns  true, if there is any free transmit mailbox.
+ * @param[in] nr Unsigned int32. ID number of the first filter of slave block.
  */
-bool can_available_mailbox(uint32_t canport)
+void can_filter_set_slave_start(uint32_t canport, uint32_t nr)
 {
-	return CAN_TSR(canport) & (CAN_TSR_TME0 | CAN_TSR_TME1 | CAN_TSR_TME2);
+	CAN_FMR(canport) = (CAN_FMR(canport) & ~CAN_FMR_CAN2SB) |
+			   (nr << CAN_FMR_CAN2SB_SHIFT);
+}
+
+void can_filter_init_enter(uint32_t canport)
+{
+	CAN_FMR(canport) |= CAN_FMR_FINIT;
+}
+
+void can_filter_init_leave(uint32_t canport)
+{
+	CAN_FMR(canport) &= ~CAN_FMR_FINIT;
+}
+
+void can_filter_enable(uint32_t canport, uint32_t nr)
+{
+	CAN_FA1R(canport) |= (1 << nr);
+}
+
+void can_filter_disable(uint32_t canport, uint32_t nr)
+{
+	CAN_FA1R(canport) &= ~(1 << nr);
+}
+
+/** @cond private */
+
+static inline
+void can_filter_set(const uint32_t canport, const uint32_t nr,
+	const uint8_t fifo, const bool mask, const bool b32,
+	const uint32_t fir1, uint32_t fir2)
+{
+	uint32_t bit = (1 << nr);
+
+	CAN_FA1R(canport) &= ~bit;	/* Deactivate the filter. */
+	if (b32) {
+		CAN_FS1R(canport) |= bit;	/* 32-bit */
+	} else {
+		CAN_FS1R(canport) &= ~bit;	/* 16-bit */
+	}
+
+	if (mask) {
+		CAN_FM1R(canport) &= ~bit;	/* ID mask mode. */
+	} else {
+		CAN_FM1R(canport) |= bit;	/* ID list mode. */
+	}
+
+	CAN_FiR1(canport, nr) = fir1;
+	CAN_FiR2(canport, nr) = fir2;
+
+	/* Select FIFO0 or FIFO1 as filter assignement. */
+	if (fifo) {
+		CAN_FFA1R(canport) |= bit;  /* FIFO1 */
+	} else {
+		CAN_FFA1R(canport) &= ~bit; /* FIFO0 */
+	}
+
+	CAN_FA1R(canport) |= bit; 	/* Activate filter. */
+}
+
+#define __CANFILT32(addr)			\
+	((addr) & 0xFFFFFFFE)
+
+#define __CANFILT16(addr)			\
+	((CAN_ID_GETSTD(addr) << 6) |		\
+	 (CAN_ID_GETEXT(addr) >> 15) |		\
+	 (CAN_ID_ISEXT(addr) ? 0x08 : 0) |	\
+	 (CAN_ID_ISREMOTE(addr) ? 0x10 : 0))
+
+/** @endcond private */
+
+void can_filter_set_list32(uint32_t canport, uint32_t nr, uint8_t fifo,
+	uint32_t mobid1, uint32_t mobid2)
+{
+	can_filter_set(canport, nr, fifo, false, true,
+			__CANFILT32(mobid1),
+			__CANFILT32(mobid2));
+}
+
+void can_filter_set_list16(uint32_t canport, uint32_t nr, uint8_t fifo,
+	uint32_t mobid1, uint32_t mobid2, uint32_t mobid3, uint32_t mobid4)
+{
+	can_filter_set(canport, nr, fifo, false, false,
+			__CANFILT16(mobid1) | (__CANFILT16(mobid2) << 16),
+			__CANFILT16(mobid3) | (__CANFILT16(mobid4) << 16));
+}
+
+void can_filter_set_mask32(uint32_t canport, uint32_t nr, uint8_t fifo,
+	uint32_t mobid, uint32_t mask)
+{
+	can_filter_set(canport, nr, fifo, true, true,
+			__CANFILT32(mobid),
+			__CANFILT32(mask));
+}
+
+void can_filter_set_mask16(uint32_t canport, uint32_t nr, uint8_t fifo,
+	uint32_t mobid1, uint32_t mask1, uint32_t mobid2, uint32_t mask2)
+{
+	can_filter_set(canport, nr, fifo, true, false,
+			__CANFILT16(mobid1) | (__CANFILT16(mask1) << 16),
+			__CANFILT16(mobid2) | (__CANFILT16(mask2) << 16));
+}
+
+
+/* FUNCTIONS BELOW INSIDE DOXYGEN BLOCK WILL BE DEPRECATED !!!
+   KEEP ONLY FOR COMPATIBILITY WITH OLD SW*/
+
+/*----------------------------------------------------------------------------*/
+/** @brief CAN Filter Init
+ *
+ * Initialize incoming message filter and assign to FIFO.
+ *
+ * @param[in] canport Unsigned int32. CAN block register base @ref can_reg_base.
+ * @param[in] nr Unsigned int32. ID number of the filter.
+ * @param[in] scale_32bit bool. 32-bit scale for the filter?
+ * @param[in] id_list_mode bool. ID list filter mode?
+ * @param[in] fr1 Unsigned int32. First filter register content.
+ * @param[in] fr2 Unsigned int32. Second filter register content.
+ * @param[in] fifo Unsigned int32. FIFO id.
+ * @param[in] enable bool. Enable filter?
+ */
+void can_filter_init(uint32_t canport, uint32_t nr, bool scale_32bit,
+		     bool id_list_mode, uint32_t fr1, uint32_t fr2,
+		     uint32_t fifo, bool enable)
+{
+	/* Request initialization "enter". */
+	can_filter_init_enter(canport);
+
+	can_filter_set(canport, nr, fifo, !id_list_mode, scale_32bit, fr1, fr2);
+
+	if (!enable) {
+		can_filter_disable(canport, nr);
+	}
+
+	can_filter_init_leave(canport);
 }
 
 /*----------------------------------------------------------------------------*/
-/** @brief Get index of the empty or lowest priority transmit mailbox
+/** @brief CAN Initialize a 16bit Message ID Mask Filter
  *
  * @param[in] canport Unsigned int32. CAN block register base @ref can_reg_base.
- * @returns int32_t 0..2: The index of the empty transmit mailbox.
+ * @param[in] nr Unsigned int32. ID number of the filter.
+ * @param[in] id1 Unsigned int16. First message ID to filter.
+ * @param[in] mask1 Unsigned int16. First message ID bit mask.
+ * @param[in] id2 Unsigned int16. Second message ID to filter.
+ * @param[in] mask2 Unsigned int16. Second message ID bit mask.
+ * @param[in] fifo Unsigned int32. FIFO id.
+ * @param[in] enable bool. Enable filter?
  */
-int32_t can_get_empty_mailbox(uint32_t canport)
+void can_filter_id_mask_16bit_init(uint32_t canport, uint32_t nr, uint16_t id1,
+				   uint16_t mask1, uint16_t id2,
+				   uint16_t mask2, uint32_t fifo, bool enable)
 {
-	return (CAN_TSR(canport) & CAN_TSR_CODE) >> CAN_TSR_CODE_SHIFT;
+	can_filter_init(canport, nr, false, false,
+			((uint32_t)id1 << 16) | (uint32_t)mask1,
+			((uint32_t)id2 << 16) | (uint32_t)mask2, fifo, enable);
 }
 
 /*----------------------------------------------------------------------------*/
-/** @brief Get the actual error code
+/** @brief CAN Initialize a 32bit Message ID Mask Filter
  *
  * @param[in] canport Unsigned int32. CAN block register base @ref can_reg_base.
- * @returns The actual error code.
+ * @param[in] nr Unsigned int32. ID number of the filter.
+ * @param[in] id Unsigned int32. Message ID to filter.
+ * @param[in] mask Unsigned int32. Message ID bit mask.
+ * @param[in] fifo Unsigned int32. FIFO id.
+ * @param[in] enable bool. Enable filter?
  */
-uint32_t can_errorcode(uint32_t canport)
+void can_filter_id_mask_32bit_init(uint32_t canport, uint32_t nr, uint32_t id,
+				   uint32_t mask, uint32_t fifo, bool enable)
 {
-	return CAN_ESR(canport) & CAN_ESR_LEC;
+	can_filter_init(canport, nr, true, false, id, mask, fifo, enable);
 }
 
+/*----------------------------------------------------------------------------*/
+/** @brief CAN Initialize a 16bit Message ID List Filter
+ *
+ * @param[in] canport Unsigned int32. CAN block register base @ref can_reg_base.
+ * @param[in] nr Unsigned int32. ID number of the filter.
+ * @param[in] id1 Unsigned int16. First message ID to match.
+ * @param[in] id2 Unsigned int16. Second message ID to match.
+ * @param[in] id3 Unsigned int16. Third message ID to match.
+ * @param[in] id4 Unsigned int16. Fourth message ID to match.
+ * @param[in] fifo Unsigned int32. FIFO id.
+ * @param[in] enable bool. Enable filter?
+ */
+void can_filter_id_list_16bit_init(uint32_t canport, uint32_t nr,
+				   uint16_t id1, uint16_t id2,
+				   uint16_t id3, uint16_t id4,
+				   uint32_t fifo, bool enable)
+{
+	can_filter_init(canport, nr, false, true,
+			((uint32_t)id1 << 16) | (uint32_t)id2,
+			((uint32_t)id3 << 16) | (uint32_t)id4, fifo, enable);
+}
+
+/*----------------------------------------------------------------------------*/
+/** @brief CAN Initialize a 32bit Message ID List Filter
+ *
+ * @param[in] canport Unsigned int32. CAN block register base @ref can_reg_base.
+ * @param[in] nr Unsigned int32. ID number of the filter.
+ * @param[in] id1 Unsigned int32. First message ID to match.
+ * @param[in] id2 Unsigned int32. Second message ID to match.
+ * @param[in] fifo Unsigned int32. FIFO id.
+ * @param[in] enable bool. Enable filter?
+ */
+void can_filter_id_list_32bit_init(uint32_t canport, uint32_t nr,
+				   uint32_t id1, uint32_t id2,
+				   uint32_t fifo, bool enable)
+{
+	can_filter_init(canport, nr, true, true, id1, id2, fifo, enable);
+}
+
+/**@}*/ /* end of can_filter_api group */
+
+/******************************************************************************/
+/** @defgroup can_timing_api CAN Timing manipulation
+ * @ingroup can_file
+ *
+ *@{*/
 
 /*----------------------------------------------------------------------------*/
 /** @brief Initialize timing structure
@@ -1146,5 +1187,114 @@ uint32_t can_timing_getfreq(struct can_timing *timing)
 	uint32_t N = 1 + timing->ts1 + timing->ts2;
 	return rcc_ppre1_frequency / (N * timing->brp);
 }
+
+/**@}*/ /* can_timing_api doxygen group */
+
+/******************************************************************************/
+/** @defgroup can_addr_api CAN Address manipulation
+ * @ingroup can_file
+ *
+ * According to the standard CAN 2.0, there is two addressing schemes available.
+ *
+ * The CAN2.0A (or older CAN1.0) is using standard 11-bit message object
+ * identifier (MOB-ID) The CAN2.0B is using extended 29-bit identifier for
+ * the message.
+ *
+ * The higher-level protocols, such as CanOpen, DeviceNet ..., defines the
+ * compatibility between CAN2.0A and CAN2.0B using highest 11 bits of the
+ * extended identifier in same way as standard MOB-ID, and rest 18 bits is
+ * using as extension to this standard MOB. The MOB-ID can be therefore printed
+ * as (0x7FF) for CAN2.0A frame, and (7FF.3FFFF) for CAN2.0B frame.
+ *
+ * @code
+ *  31       20                   2     0
+ *  +--------+--------------------+-----+
+ *  | STD-ID |       EXT-ID       | 100 |  <- the extended Message ID
+ *  +--------+--------------------+-----+
+ *  | STD-ID | 000000000000000000 | 000 |  <- the standard Message ID
+ *  +--------+--------------------+-----+
+ * @endcode
+ *
+ * For this situation to describe, the can_addr structure has the 11-bit
+ * standard object identifier in the cobid value and the 18bit extension of the
+ * identifier is stripped out to the extid param.
+ *
+ * There is also defined conversion functions to convert between can_addr
+ * structure and left-aligned 32-bit unsigned integer representation of the
+ * Message Object ID
+ *
+ *@{*/
+
+
+/*----------------------------------------------------------------------------*/
+/** @brief CAN Address Compare
+ *
+ * @param[in] mobid1 uint32_t First MOB-ID to compare
+ * @param[in] mobid2 uint32_t Second MOB-ID to compare
+ * @return bool true, if both MOB-IDs are same
+ */
+bool can_mobid_compare(uint32_t mobid1, uint32_t mobid2)
+{
+	uint32_t diff = mobid1 ^ mobid2;
+
+	if (!CAN_ID_ISEXT(mobid2)) {
+		diff &= ~CAN_MOBID_EXT;	/* Ignore ext field on STD ID */
+	}
+	return !diff;
+}
+
+/*----------------------------------------------------------------------------*/
+/** @brief CAN Address Compare Masked
+ *
+ * @param[in] mobid1 uint32_t First MOB-ID to compare
+ * @param[in] mobid2 uint32_t Second MOB-ID value compare
+ * @param[in] mask2 uint32_t Second MOB-ID mask compare
+ * @return bool true, if addr1 is inside group addr2
+ */
+bool can_mobid_compare_masked(uint32_t mobid1, uint32_t mobid2, uint32_t mask2)
+{
+	uint32_t diff = mobid1 ^ mobid2;
+
+	if (!CAN_ID_ISEXT(mobid2)) {
+		diff &= ~CAN_MOBID_EXT;	/* Ignore ext field on STD ID */
+	}
+	return !(diff & mask2);
+}
+
+/*----------------------------------------------------------------------------*/
+/** @brief CAN Address Compare COB-ID
+ *
+ * This comparsion compares only the COB-ID value of both adresses. It is useful
+ * for mangling with higher protocols, that treats higher 11 bits of extended
+ * COB-ID same way as it was standard ID.
+ *
+ * @param[in] mobid1 uint32_t First MOB-ID to compare
+ * @param[in] mobid2 uint32_t Second MOB-ID to compare
+ * @return bool true, if addresses are same
+ */
+bool can_mobid_compare_stdid(uint32_t mobid1, uint32_t mobid2)
+{
+	return !((mobid1 ^ mobid2) & CAN_MOBID_STD);
+}
+
+/*----------------------------------------------------------------------------*/
+/** @brief CAN Address Compare COB-ID Masked
+ *
+ * This comparsion compares only the COB-ID value of both adresses. It is useful
+ * for mangling with higher protocols, that treats higher 11 bits of extended
+ * COB-ID same way as it was standard ID.
+ *
+ * @param[in] mobid1 uint32_t First MOB-ID to compare
+ * @param[in] mobid2 uint32_t Second MOB-ID value compare
+ * @param[in] mask2 uint32_t Second MOB-ID mask compare
+ * @return bool true, if addr1 is inside group addr2
+ */
+bool can_mobid_compare_stdid_masked(uint32_t mobid1, uint32_t mobid2,
+				   uint32_t mask2)
+{
+	return !((mobid1 ^ mobid2) & (CAN_MOBID_STD & mask2));
+}
+
+/**@}*/ /* can_addr_api doxygen group */
 
 /**@}*/

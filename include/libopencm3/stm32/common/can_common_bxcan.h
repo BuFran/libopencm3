@@ -38,7 +38,9 @@
 
 /**@{*/
 
-/* --- Convenience macros --------------------------------------------------- */
+/*****************************************************************************/
+/* Module definitions                                                        */
+/*****************************************************************************/
 
 /* CAN register base addresses (for convenience) */
 /******************************************************************************/
@@ -50,7 +52,9 @@
 #define CAN2				BX_CAN2_BASE
 /**@}*/
 
-/* --- CAN registers -------------------------------------------------------- */
+/*****************************************************************************/
+/* Register definitions                                                      */
+/*****************************************************************************/
 
 /* CAN master control register (CAN_MCR) */
 #define CAN_MCR(can_base)		MMIO32(can_base + 0x000)
@@ -76,58 +80,51 @@
 /* --- CAN mailbox registers ------------------------------------------------ */
 
 /* CAN mailbox / FIFO register offsets */
-#define CAN_MBOX(mbox)			(0x180 + 0x10 * (mbox))
-#define CAN_MBOX0			CAN_MBOX(0)
-#define CAN_MBOX1			CAN_MBOX(1)
-#define CAN_MBOX2			CAN_MBOX(2)
-
-#define CAN_FIFO(fifo)			(0x1B0 + 0x10 * (fifo))
-#define CAN_FIFO0			CAN_FIFO(0)
-#define CAN_FIFO1			CAN_FIFO(1)
 
 /* CAN TX mailbox identifier register (CAN_TIxR) */
-#define CAN_TIxR(can_base, mbox)	MMIO32(can_base + mbox + 0x0)
-#define CAN_TI0R(can_base)		CAN_TIxR(can_base, CAN_MBOX0)
-#define CAN_TI1R(can_base)		CAN_TIxR(can_base, CAN_MBOX1)
-#define CAN_TI2R(can_base)		CAN_TIxR(can_base, CAN_MBOX2)
+#define CAN_TIxR(can_base, mbox)	MMIO32(can_base + 0x10 * (mbox) + 0x180)
+#define CAN_TI0R(can_base)		CAN_TIxR(can_base, 0)
+#define CAN_TI1R(can_base)		CAN_TIxR(can_base, 1)
+#define CAN_TI2R(can_base)		CAN_TIxR(can_base, 2)
 
 /* CAN mailbox data length control and time stamp register (CAN_TDTxR) */
-#define CAN_TDTxR(can_base, mbox)	MMIO32(can_base + mbox + 0x4)
-#define CAN_TDT0R(can_base)		CAN_TDTxR(can_base, CAN_MBOX0)
-#define CAN_TDT1R(can_base)		CAN_TDTxR(can_base, CAN_MBOX1)
-#define CAN_TDT2R(can_base)		CAN_TDTxR(can_base, CAN_MBOX2)
+#define CAN_TDTxR(can_base, mbox)	MMIO32(can_base + 0x10 * (mbox) + 0x184)
+#define CAN_TDT0R(can_base)		CAN_TDTxR(can_base, 0)
+#define CAN_TDT1R(can_base)		CAN_TDTxR(can_base, 1)
+#define CAN_TDT2R(can_base)		CAN_TDTxR(can_base, 2)
 
 /* CAN mailbox data low register (CAN_TDLxR) */
-#define CAN_TDLxR(can_base, mbox)	MMIO32(can_base + mbox + 0x8)
-#define CAN_TDL0R(can_base)		CAN_TDLxR(can_base, CAN_MBOX0)
-#define CAN_TDL1R(can_base)		CAN_TDLxR(can_base, CAN_MBOX1)
-#define CAN_TDL2R(can_base)		CAN_TDLxR(can_base, CAN_MBOX2)
+#define CAN_TDLxR(can_base, mbox)	MMIO32(can_base + 0x10 * (mbox) + 0x188)
+#define CAN_TDL0R(can_base)		CAN_TDLxR(can_base, 0)
+#define CAN_TDL1R(can_base)		CAN_TDLxR(can_base, 1)
+#define CAN_TDL2R(can_base)		CAN_TDLxR(can_base, 2)
 
 /* CAN mailbox data high register (CAN_TDHxR) */
-#define CAN_TDHxR(can_base, mbox)	MMIO32(can_base + mbox + 0xC)
-#define CAN_TDH0R(can_base)		CAN_TDHxR(can_base, CAN_MBOX0)
-#define CAN_TDH1R(can_base)		CAN_TDHxR(can_base, CAN_MBOX1)
-#define CAN_TDH2R(can_base)		CAN_TDHxR(can_base, CAN_MBOX2)
+#define CAN_TDHxR(can_base, mbox)	MMIO32(can_base + 0x10 * (mbox) + 0x18C)
+#define CAN_TDH0R(can_base)		CAN_TDHxR(can_base, 0)
+#define CAN_TDH1R(can_base)		CAN_TDHxR(can_base, 1)
+#define CAN_TDH2R(can_base)		CAN_TDHxR(can_base, 2)
+
 
 /* CAN RX FIFO identifier register (CAN_RIxR) */
-#define CAN_RIxR(can_base, fifo)	MMIO32(can_base + fifo + 0x0)
-#define CAN_RI0R(can_base)		CAN_RIxR(can_base, CAN_FIFO0)
-#define CAN_RI1R(can_base)		CAN_RIxR(can_base, CAN_FIFO1)
+#define CAN_RIxR(can_base, fifo)	MMIO32(can_base + 0x10 * (fifo) + 0x1B0)
+#define CAN_RI0R(can_base)		CAN_RIxR(can_base, 0)
+#define CAN_RI1R(can_base)		CAN_RIxR(can_base, 1)
 
 /* CAN RX FIFO mailbox data length control & time stamp register (CAN_RDTxR) */
-#define CAN_RDTxR(can_base, fifo)	MMIO32(can_base + fifo + 0x4)
-#define CAN_RDT0R(can_base)		CAN_RDTxR(can_base, CAN_FIFO0)
-#define CAN_RDT1R(can_base)		CAN_RDTxR(can_base, CAN_FIFO1)
+#define CAN_RDTxR(can_base, fifo)	MMIO32(can_base + 0x10 * (fifo) + 0x1B4)
+#define CAN_RDT0R(can_base)		CAN_RDTxR(can_base, 0)
+#define CAN_RDT1R(can_base)		CAN_RDTxR(can_base, 1)
 
 /* CAN RX FIFO mailbox data low register (CAN_RDLxR) */
-#define CAN_RDLxR(can_base, fifo)	MMIO32(can_base + fifo + 0x8)
-#define CAN_RDL0R(can_base)		CAN_RDLxR(can_base, CAN_FIFO0)
-#define CAN_RDL1R(can_base)		CAN_RDLxR(can_base, CAN_FIFO1)
+#define CAN_RDLxR(can_base, fifo)	MMIO32(can_base + 0x10 * (fifo) + 0x1B8)
+#define CAN_RDL0R(can_base)		CAN_RDLxR(can_base, 0)
+#define CAN_RDL1R(can_base)		CAN_RDLxR(can_base, 1)
 
 /* CAN RX FIFO mailbox data high register (CAN_RDHxR) */
-#define CAN_RDHxR(can_base, fifo)	MMIO32(can_base + fifo + 0xC)
-#define CAN_RDH0R(can_base)		CAN_RDHxR(can_base, CAN_FIFO0)
-#define CAN_RDH1R(can_base)		CAN_RDHxR(can_base, CAN_FIFO1)
+#define CAN_RDHxR(can_base, fifo)	MMIO32(can_base + 0x10 * (fifo) + 0x1BC)
+#define CAN_RDH0R(can_base)		CAN_RDHxR(can_base, 0)
+#define CAN_RDH1R(can_base)		CAN_RDHxR(can_base, 1)
 
 /* --- CAN filter registers ------------------------------------------------- */
 /* Not available on CAN2 !*/
@@ -165,6 +162,10 @@
 						(bank * 0x8) + 0x0)
 #define CAN_FiR2(can_base, bank)	MMIO32(can_base + 0x240 + \
 						(bank * 0x8) + 0x4)
+
+/*****************************************************************************/
+/* Register values                                                           */
+/*****************************************************************************/
 
 /* --- CAN_MCR values ------------------------------------------------------- */
 
@@ -677,7 +678,14 @@
 
 /* FB[31:0]: Filter bits */
 
-/* --- CAN functions -------------------------------------------------------- */
+/*****************************************************************************/
+/* API definitions                                                           */
+/*****************************************************************************/
+
+/******************************************************************************/
+/** @addtogroup can_timing_api
+ *
+ *@{*/
 
 /** @brief Can Bit timing description
  *
@@ -724,9 +732,9 @@ struct can_timing {
 	uint32_t sjw;
 };
 
-/******************************************************************************/
+/*----------------------------------------------------------------------------*/
 /** @defgroup can_freq CAN Bit frequency
- * @ingroup can_defines
+ * @ingroup can_timing_api
  *
  *@{*/
 #define CAN_FREQ_1M		1000000
@@ -737,9 +745,9 @@ struct can_timing {
 #define CAN_FREQ_10K		10000
 /**@}*/
 
-/******************************************************************************/
+/*----------------------------------------------------------------------------*/
 /** @defgroup can_samplepoint CAN Sample point values
- * @ingroup can_defines
+ * @ingroup can_timing_api
  *
  *@{*/
 #define CAN_SAMPLE_75		(3 * 0x100 / 4)
@@ -747,18 +755,54 @@ struct can_timing {
 #define CAN_SAMPLE_50		(1 * 0x100 / 2)
 /**@}*/
 
+/**@}*/ /* addrogroup can_timing_api */
 
-/* Addresses are in format (cobid) or (cobid:extid) */
-struct can_addr {
-	uint16_t cobid; /* 11-bit standard object identifier */
-	uint32_t extid; /* 18-bit extension object identifier */
-	bool ext; /* true, if identifier is extended */
-	bool rtr; /* true, if this is remote frame */
-};
 
-#define CAN_ADDR_STD(id)	{ .cobid = (id), .ext = false }
-#define CAN_ADDR_EXT(id, ext)	{ .cobid = (id), .ext = true, .extid = (ext) }
+/******************************************************************************/
+/** @addtogroup can_addr_api
+ *
+ *@{*/
 
+#define CAN_MOBID_STD_SHIFT	21
+#define CAN_MOBID_STD		(0x7FF << CAN_MOBID_STD_SHIFT)
+#define CAN_MOBID_STD_VAL(x)	((x) << CAN_MOBID_STD_SHIFT)
+
+#define CAN_MOBID_EXT_SHIFT	3
+#define CAN_MOBID_EXT		(0x3FFFF << CAN_MOBID_EXT_SHIFT)
+#define CAN_MOBID_EXT_VAL(x)	((x) << CAN_MOBID_EXT_SHIFT)
+
+#define CAN_MOBID_IDE		(1 << 2)
+#define CAN_MOBID_RTR		(1 << 1)
+
+
+
+#define CAN_ID_STDID(std)			\
+	(CAN_MOBID_STD_VAL(std))
+
+#define CAN_ID_EXTID(std, ext)			\
+	(CAN_MOBID_STD_VAL(std) | CAN_MOBID_EXT_VAL(ext) | CAN_MOBID_IDE)
+
+#define CAN_ID_STDID_REMOTE(std)		\
+	(CAN_MOBID_STD_VAL(std) | CAN_MOBID_RTR)
+
+#define CAN_ID_EXTID_REMOTE(std, ext)		\
+	(CAN_MOBID_STD_VAL(std) | CAN_MOBID_EXT_VAL(ext) | CAN_MOBID_IDE | \
+	CAN_MOBID_RTR)
+
+#define CAN_ID_ISEXT(val)	((val & CAN_MOBID_IDE) != 0)
+
+#define CAN_ID_ISREMOTE(val)	((val & CAN_MOBID_RTR) != 0)
+
+#define CAN_ID_GETSTD(val)	((val & CAN_MOBID_STD) >> CAN_MOBID_STD_SHIFT)
+
+#define CAN_ID_GETEXT(val)	((val & CAN_MOBID_EXT) >> CAN_MOBID_EXT_SHIFT)
+
+
+/**@}*/ /* addrogroup can_addr_api */
+
+/*****************************************************************************/
+/* API Functions                                                             */
+/*****************************************************************************/
 
 BEGIN_DECLS
 
@@ -812,15 +856,13 @@ void can_filter_enable(uint32_t canport, uint32_t nr);
 void can_filter_disable(uint32_t canport, uint32_t nr);
 
 void can_filter_set_list32(uint32_t canport, uint32_t nr, uint8_t fifo,
-	struct can_addr *addr1, struct can_addr *addr2);
+	uint32_t mobid1, uint32_t mobid2);
 void can_filter_set_list16(uint32_t canport, uint32_t nr, uint8_t fifo,
-	struct can_addr *addr1, struct can_addr *addr2,
-	struct can_addr *addr3, struct can_addr *addr4);
+	uint32_t mobid1, uint32_t mobid2, uint32_t mobid3, uint32_t mobid4);
 void can_filter_set_mask32(uint32_t canport, uint32_t nr, uint8_t fifo,
-	struct can_addr *addr, struct can_addr *mask);
+	uint32_t mobid, uint32_t mask);
 void can_filter_set_mask16(uint32_t canport, uint32_t nr, uint8_t fifo,
-	struct can_addr *addr1, struct can_addr *mask1,
-	struct can_addr *addr2, struct can_addr *mask2);
+	uint32_t mobid1, uint32_t mask1, uint32_t mobid2, uint32_t mask2);
 
 
 /* irq operations */
@@ -833,24 +875,38 @@ bool can_transmit_irq_is_pending(uint32_t canport, uint32_t irq);
 bool can_status_irq_clear_pending(uint32_t canport, uint32_t irq);
 bool can_fifo_irq_clear_pending(uint32_t canport, uint32_t irq);
 
-void can_transmit_mbox(uint32_t canport, uint32_t mailbox,
-		const struct can_addr *addr, uint8_t *data, uint8_t length);
-
-int can_transmit(uint32_t canport, const struct can_addr *addr, uint8_t *data,
+/* Transmit mailbox operations */
+bool can_mailbox_is_available(uint32_t canport);
+int32_t can_mailbox_get_lowprio(uint32_t canport);
+uint16_t can_mailbox_get_timestamp(uint32_t canport, uint32_t mailbox);
+void can_mailbox_write_data(uint32_t canport, uint32_t mailbox, uint8_t *data,
+			    uint8_t length);
+void can_mailbox_set_mobid(uint32_t canport, uint32_t mailbox, uint32_t mobid);
+void can_mailbox_set_tx_time(uint32_t canport, uint32_t mailbox, bool enable);
+void can_mailbox_transmit(uint32_t canport, uint32_t mailbox);
+int can_transmit(uint32_t canport, uint32_t mobid, uint8_t *data,
 		uint8_t length);
 
-void can_receive(uint32_t canport, uint8_t fifo, bool release,
-		 struct can_addr *addr,	uint32_t *fmi, uint8_t *data,
-		 uint8_t *length);
-
+/* Receive fifo operations */
 void can_fifo_release(uint32_t canport, uint8_t fifo);
+void can_fifo_read_data(uint32_t canport, uint8_t fifo, uint8_t *data,
+			uint8_t *length);
+uint32_t can_fifo_get_mobid(uint32_t canport, uint8_t fifo);
+uint32_t can_fifo_get_filter_id(uint32_t canport, uint8_t fifo);
+uint16_t can_fifo_get_timestamp(uint32_t canport, uint8_t fifo);
 
-/* mailbox operations */
-bool can_available_mailbox(uint32_t canport);
-int32_t can_get_empty_mailbox(uint32_t canport);
+void can_receive(uint32_t canport, uint8_t fifo, bool release, uint32_t *mobid,
+		 uint32_t *fmi, uint8_t *data, uint8_t *length);
 
 /* error operations */
 uint32_t can_errorcode(uint32_t canport);
+
+/* can address operations */
+bool can_mobid_compare(uint32_t mobid1, uint32_t mobid2);
+bool can_mobid_compare_masked(uint32_t mobid1, uint32_t mobid2, uint32_t mask2);
+bool can_mobid_compare_stdid(uint32_t mobid1, uint32_t mobid2);
+bool can_mobid_compare_stdid_masked(uint32_t mobid1, uint32_t mobid2,
+				   uint32_t mask2);
 
 /* timing operations */
 void can_timing_set(uint32_t canport, struct can_timing *timing);
