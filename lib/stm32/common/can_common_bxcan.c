@@ -701,7 +701,11 @@ void can_mailbox_write_data(uint32_t canport, uint32_t mailbox, uint8_t *data,
 void can_mailbox_set_mobid(uint32_t canport, uint32_t mailbox,
 			      uint32_t mobid)
 {
-	CAN_TIxR(canport, mailbox) = mobid & ~1U;
+	CAN_TIxR(canport, mailbox) =
+		(CAN_ID_ISEXT(mobid) ? CAN_TIxR_IDE : 0) |
+		(CAN_ID_ISREMOTE(mobid) ? CAN_TIxR_RTR : 0) |
+		(CAN_ID_GETSTD(mobid) << CAN_TIxR_STID_SHIFT) |
+		(CAN_ID_GETEXT(mobid) << CAN_TIxR_EXID_SHIFT);
 }
 
 /*----------------------------------------------------------------------------*/
@@ -837,7 +841,12 @@ void can_fifo_read_data(uint32_t canport, uint8_t fifo, uint8_t *data,
  */
 uint32_t can_fifo_get_mobid(uint32_t canport, uint8_t fifo)
 {
-	return CAN_RIxR(canport, fifo) & ~1U;
+	uint32_t id = CAN_RIxR(canport, fifo);
+
+	return ((id & CAN_RIxR_IDE) ? CAN_MOBID_IDE : 0) |
+		((id & CAN_RIxR_RTR) ? CAN_MOBID_RTR : 0) |
+		(CAN_MOBID_STD_VAL(id >> CAN_RIxR_STID_SHIFT) & CAN_MOBID_STD) |
+		(CAN_MOBID_EXT_VAL(id >> CAN_RIxR_EXID_SHIFT) & CAN_MOBID_EXT);
 }
 
 /*----------------------------------------------------------------------------*/
@@ -1186,6 +1195,82 @@ void can_filter_id_list_32bit_init(uint32_t canport, uint32_t nr,
 /******************************************************************************/
 /** @defgroup can_timing_api CAN Timing manipulation
  * @ingroup can_file
+ *
+ * @section CAN Timing API
+ * The timing of the CAN bus is adaptive to meet different requirements of
+ * different applications of CAN bus. This API is constructed to ease
+ * configuration of the bus, and to provide some standard configurations
+ * of the bus.
+ *
+ * All of timing are specified in the number of Time Quanta's (TQ). This is the
+ * master clock of the CAN controller.
+ *
+ * Clock reconstruction (X means sampling point)
+ *
+ * @code
+ * |<------- prolonged bit time -------->|
+ * +-----+--------------+-----X----------+
+ * | SYN |    PHASE1    | SJW X  PHASE2  | <-- slower clock on the bus
+ * +-----+--------------+-----X----------+
+ *
+ * |<----- nominal bit time ------>|
+ * +-----+--------------X----------+
+ * | SYN |    PHASE1    X  PHASE2  |       <-- normal clock on the bus
+ * +-----+--------------X----------+
+ *
+ *                           | SJW |
+ * +-----+--------------X----+-----+
+ * | SYN |    PHASE1    X P2 |   <-- faster clock on the bus (P2 = PHASE2 - SJW)
+ * +-----+--------------X----+
+ * |<- shortened bit time -->|
+ * @endcode
+ *
+ * At the SYN (length is always 1 TQ) is detected edge on the bus.
+
+ * The PHASE1 time is stabilization phase, the bus input is ignored. In the
+ * configuration, it represents the time propagation of the signal via the bus,
+ * including any delays in optocouplers and CAN drivers.
+ *
+ * After PHASE1, the sampling of value of the bus is started, and the
+ * arbitration can occur. The edge detection of the next bit is started too.
+ *
+ * At the nominal clock rate, the edge comes exactly after PHASE2 time. But the
+ * edge can come sooner (the PHASE2 will be shortened) or later (the PHASE1 will
+ * be prolonged and sample point delayed) for a maximm SJW time quanta's. This
+ * defines need, that PHASE2 must be always greater than SJW.
+ *
+ * The longest possible SJW will make the bus more tolerant to clock skew
+ * between devices, but may need to move sample point nearer the center of the
+ * bit.
+ *
+ * The sample positon defines immunity to the propagation delays of cabling and
+ * reflections on the cable, but moving sample point near the end will make the
+ * bus less tolerant to clock skew. In industrial applications, the sample point
+ * is near 75% of the bit time (SP = 0.75)
+ *
+ *  @f[ SP= \frac{SYN + PHASE_1}{SYN + PHASE_1 + PHASE_2} @f]
+ *
+ * The final baud rate of the CAN bus is defined by the nominal bit time as the
+ * sum of all time quantas in each bit
+ *
+ *  @f[ f_{CAN} = \frac{f_{TQ}}{SYN + PHASE_1 + PHASE_2} @f]
+ *
+ * The final tolerance to clock skew is defined by the maximum resynchronization
+ * jump width (SJW) respective to the total bit time (SYN + PHASE1 + PHASE2).
+ * Due to two ends of the bus, the final tolerance of single endpoint must be
+ * divided by two. The Resynchronization edge is there each 6th bit due to bit
+ * stuffing, therefore resulting skew must be 6x less.
+ *
+ * @f[
+ * \Delta f_{CAN} = \frac{1}{2} \frac{1}{6} \frac{SJW}{SYN + PHASE_1 + PHASE_2}
+ * @f]
+ *
+ * For the some standard settings, the clocks between nodes can vary between 1%
+ * and 2% of the nominal bit time.
+ *
+ * @warning Be warned that enabling "spread spectrum" feature on the target host
+ * clock management unit will raise the oscillator clock skew appropriatedly,
+ * and the CAN bus settings must be adapted to work correctly.
  *
  *@{*/
 
