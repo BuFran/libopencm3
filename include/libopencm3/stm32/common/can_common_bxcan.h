@@ -763,16 +763,19 @@ struct can_timing {
  *
  *@{*/
 
-#define CAN_MOBID_STD_SHIFT	21
+#define CAN_MOBID_IDE		(1 << 31)
+#define CAN_MOBID_RTR		(1 << 30)
+#define CAN_MOBID_ERR		(1 << 29)
+
+#define CAN_MOBID_STD_SHIFT	18
 #define CAN_MOBID_STD		(0x7FF << CAN_MOBID_STD_SHIFT)
 #define CAN_MOBID_STD_VAL(x)	((x) << CAN_MOBID_STD_SHIFT)
 
-#define CAN_MOBID_EXT_SHIFT	3
+#define CAN_MOBID_EXT_SHIFT	0
 #define CAN_MOBID_EXT		(0x3FFFF << CAN_MOBID_EXT_SHIFT)
 #define CAN_MOBID_EXT_VAL(x)	((x) << CAN_MOBID_EXT_SHIFT)
 
-#define CAN_MOBID_IDE		(1 << 2)
-#define CAN_MOBID_RTR		(1 << 1)
+
 
 
 /*----------------------------------------------------------------------------*/
@@ -880,20 +883,19 @@ int can_init(uint32_t canport, bool ttcm, bool abom, bool awum, bool nart,
 	     bool rflm, bool txfp, uint32_t sjw, uint32_t ts1, uint32_t ts2,
 	     uint32_t brp, bool loopback, bool silent);
 
+/* irq operations */
+void can_enable_irq(uint32_t canport, uint32_t irq);
+void can_disable_irq(uint32_t canport, uint32_t irq);
+bool can_status_irq_is_pending(uint32_t canport, uint32_t irq);
+bool can_error_irq_is_pending(uint32_t canport, uint32_t irq);
+bool can_fifo_irq_is_pending(uint32_t canport, uint32_t irq);
+bool can_transmit_irq_is_pending(uint32_t canport, uint32_t irq);
+bool can_status_irq_clear_pending(uint32_t canport, uint32_t irq);
+bool can_fifo_irq_clear_pending(uint32_t canport, uint32_t irq);
+
+/* Filter operations */
+
 void can_filter_set_slave_start(uint32_t canport, uint32_t nr);
-void can_filter_init(uint32_t canport, uint32_t nr, bool scale_32bit,
-		     bool id_list_mode, uint32_t fr1, uint32_t fr2,
-		     uint32_t fifo, bool enable);
-void can_filter_id_mask_16bit_init(uint32_t canport, uint32_t nr, uint16_t id1,
-				   uint16_t mask1, uint16_t id2,
-				   uint16_t mask2, uint32_t fifo, bool enable);
-void can_filter_id_mask_32bit_init(uint32_t canport, uint32_t nr, uint32_t id,
-				   uint32_t mask, uint32_t fifo, bool enable);
-void can_filter_id_list_16bit_init(uint32_t canport, uint32_t nr, uint16_t id1,
-				   uint16_t id2, uint16_t id3, uint16_t id4,
-				   uint32_t fifo, bool enable);
-void can_filter_id_list_32bit_init(uint32_t canport, uint32_t nr, uint32_t id1,
-				   uint32_t id2, uint32_t fifo, bool enable);
 
 void can_filter_init_enter(uint32_t canport);
 void can_filter_init_leave(uint32_t canport);
@@ -910,15 +912,19 @@ void can_filter_set_mask16(uint32_t canport, uint32_t nr, uint8_t fifo,
 	uint32_t mobid1, uint32_t mask1, uint32_t mobid2, uint32_t mask2);
 
 
-/* irq operations */
-void can_enable_irq(uint32_t canport, uint32_t irq);
-void can_disable_irq(uint32_t canport, uint32_t irq);
-bool can_status_irq_is_pending(uint32_t canport, uint32_t irq);
-bool can_error_irq_is_pending(uint32_t canport, uint32_t irq);
-bool can_fifo_irq_is_pending(uint32_t canport, uint32_t irq);
-bool can_transmit_irq_is_pending(uint32_t canport, uint32_t irq);
-bool can_status_irq_clear_pending(uint32_t canport, uint32_t irq);
-bool can_fifo_irq_clear_pending(uint32_t canport, uint32_t irq);
+void can_filter_init(uint32_t canport, uint32_t nr, bool scale_32bit,
+		     bool id_list_mode, uint32_t fr1, uint32_t fr2,
+		     uint32_t fifo, bool enable);
+void can_filter_id_mask_16bit_init(uint32_t canport, uint32_t nr, uint16_t id1,
+				   uint16_t mask1, uint16_t id2,
+				   uint16_t mask2, uint32_t fifo, bool enable);
+void can_filter_id_mask_32bit_init(uint32_t canport, uint32_t nr, uint32_t id,
+				   uint32_t mask, uint32_t fifo, bool enable);
+void can_filter_id_list_16bit_init(uint32_t canport, uint32_t nr, uint16_t id1,
+				   uint16_t id2, uint16_t id3, uint16_t id4,
+				   uint32_t fifo, bool enable);
+void can_filter_id_list_32bit_init(uint32_t canport, uint32_t nr, uint32_t id1,
+				   uint32_t id2, uint32_t fifo, bool enable);
 
 /* Transmit mailbox operations */
 bool can_mailbox_is_available(uint32_t canport);
