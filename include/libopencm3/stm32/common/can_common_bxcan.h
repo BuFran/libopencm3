@@ -932,7 +932,10 @@ int32_t can_mailbox_get_lowprio(uint32_t canport);
 uint16_t can_mailbox_get_timestamp(uint32_t canport, uint32_t mailbox);
 void can_mailbox_write_data(uint32_t canport, uint32_t mailbox, uint8_t *data,
 			    uint8_t length);
+void can_mailbox_read_data(uint32_t canport, uint8_t fifo, uint8_t *data,
+			uint8_t *length);
 void can_mailbox_set_mobid(uint32_t canport, uint32_t mailbox, uint32_t mobid);
+uint32_t can_mailbox_get_mobid(uint32_t canport, uint8_t fifo);
 void can_mailbox_set_tx_time(uint32_t canport, uint32_t mailbox, bool enable);
 void can_mailbox_transmit(uint32_t canport, uint32_t mailbox);
 int can_transmit(uint32_t canport, uint32_t mobid, uint8_t *data,

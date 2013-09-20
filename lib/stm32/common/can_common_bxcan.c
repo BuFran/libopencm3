@@ -691,6 +691,53 @@ void can_mailbox_write_data(uint32_t canport, uint32_t mailbox, uint8_t *data,
 	CAN_TDHxR(canport, mailbox) = tdhxr.data32;
 }
 
+/*---------------------------------------------------------------------------*/
+/** @brief CAN Mailbox Read data
+ *
+ * @param[in] canport Unsigned int32. CAN block register base @ref can_reg_base.
+ * @param[in] mailbox Unsigned int8. Mailbox id. 0..2
+ * @param[out] data Unsigned int8[]. Message payload data.
+ * @param[out] length Unsigned int8 pointer. Length of message payload.
+ */
+void can_mailbox_read_data(uint32_t canport, uint8_t mailbox, uint8_t *data,
+			uint8_t *length)
+{
+	union {
+		uint8_t data8[4];
+		uint32_t data32;
+	} rdlxr, rdhxr;
+
+	/* Get data length. */
+	*length = CAN_TDTxR(canport, mailbox) & CAN_TDTxR_DLC;
+	/* accelerate reception by copying the CAN data from the controller
+	 * memory to the fast internal RAM
+	 */
+
+	rdlxr.data32 = CAN_TDLxR(canport, mailbox);
+	rdhxr.data32 = CAN_TDHxR(canport, mailbox);
+	/* */
+	/* Get data.
+	 * Byte wise copy is needed because we do not know the alignment
+	 * of the input buffer.
+	 * Here copying 8 bytes unconditionally is faster than using loop
+	 *
+	 * It is OK to copy all 8 bytes because the upper layer must be
+	 * prepared for data length bigger expected.
+	 * In contrary the driver has no information about the intended size.
+	 * This could be different if the max length would be handed over
+	 * to the function, but it is not the case
+	 */
+	data[0] = rdlxr.data8[0];
+	data[1] = rdlxr.data8[1];
+	data[2] = rdlxr.data8[2];
+	data[3] = rdlxr.data8[3];
+	data[4] = rdhxr.data8[0];
+	data[5] = rdhxr.data8[1];
+	data[6] = rdhxr.data8[2];
+	data[7] = rdhxr.data8[3];
+}
+
+
 /*----------------------------------------------------------------------------*/
 /** @brief Set the Message object ID for transmit
  *
@@ -706,6 +753,22 @@ void can_mailbox_set_mobid(uint32_t canport, uint32_t mailbox,
 		(CAN_ID_ISREMOTE(mobid) ? CAN_TIxR_RTR : 0) |
 		(CAN_ID_GETSTD(mobid) << CAN_TIxR_STID_SHIFT) |
 		(CAN_ID_GETEXT(mobid) << CAN_TIxR_EXID_SHIFT);
+}
+
+/*----------------------------------------------------------------------------*/
+/** @brief Get the Message object identifier
+ *
+ * @param[in] canport Unsigned int32. CAN block register base @ref can_reg_base.
+ * @param[in] mailbox Unsined int32. CAN mailbox id 0..2
+ */
+uint32_t can_mailbox_get_mobid(uint32_t canport, uint8_t mailbox)
+{
+	uint32_t id = CAN_TIxR(canport, mailbox);
+
+	return ((id & CAN_TIxR_IDE) ? CAN_MOBID_IDE : 0) |
+		((id & CAN_TIxR_RTR) ? CAN_MOBID_RTR : 0) |
+		(CAN_MOBID_STD_VAL(id >> CAN_TIxR_STID_SHIFT) & CAN_MOBID_STD) |
+		(CAN_MOBID_EXT_VAL(id >> CAN_TIxR_EXID_SHIFT) & CAN_MOBID_EXT);
 }
 
 /*----------------------------------------------------------------------------*/
