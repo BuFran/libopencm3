@@ -22,8 +22,6 @@
 
 /* load optional platform dependent initialization routines */
 #include "../dispatch/vector_chipset.c"
-/* load the weak symbols for IRQ_HANDLERS */
-#include "../dispatch/vector_nvic.c"
 
 /* Symbols exported by the linker script(s): */
 extern unsigned _data_loadaddr, _data, _edata, _ebss, _stack;
@@ -104,6 +102,9 @@ void null_handler(void)
 {
 	/* Do nothing. */
 }
+
+/* load the weak symbols for IRQ_HANDLERS */
+#include "../dispatch/vector_nvic.c"
 
 #pragma weak nmi_handler = null_handler
 #pragma weak hard_fault_handler = blocking_handler

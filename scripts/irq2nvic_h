@@ -64,6 +64,14 @@ BEGIN_DECLS
 
 END_DECLS
 
+/* Initialization template for the interrupt vector table. This definition is
+ * used by the startup code generator (vector.c) to set the initial values for
+ * the interrupt handling routines to the chip family specific _isr weak
+ * symbols. */
+
+#define IRQ_HANDLERS \
+    {vectortableinitialization}
+
 /**@}}*/
 
 #endif /* {includeguard} */
@@ -88,13 +96,6 @@ template_vector_nvic_c = '''\
 
 /**@}}*/
 
-/* Initialization template for the interrupt vector table. This definition is
- * used by the startup code generator (vector.c) to set the initial values for
- * the interrupt handling routines to the chip family specific _isr weak
- * symbols. */
-
-#define IRQ_HANDLERS \\
-    {vectortableinitialization}
 '''
 
 template_cmsis_h = '''\
