@@ -38,7 +38,7 @@ CFLAGS		= -Os -g \
 ARFLAGS		= rcs
 
 OBJS		= adc.o adc_common_v1.o can.o desig.o gpio.o pwr.o rcc.o \
-		  rtc.o crypto.o
+		  rtc.o crypto.o fmc.o
 
 OBJS            += crc_common_all.o dac_common_all.o dma_common_f24.o \
                    gpio_common_all.o gpio_common_f0234.o i2c_common_all.o \
@@ -52,7 +52,7 @@ OBJS            += crc_common_all.o dac_common_all.o dma_common_f24.o \
 OBJS            += usb.o usb_standard.o usb_control.o usb_fx07_common.o \
 		   usb_f107.o usb_f207.o usb_msc.o
 
-OBJS		+= mac.o phy.o mac_stm32fxx7.o phy_ksz8051mll.o fmc.o
+OBJS		+= mac.o phy.o mac_stm32fxx7.o phy_ksz8051mll.o phy_ste100.o phy_lan8710.o
 
 VPATH += ../../usb:../:../../cm3:../common
 VPATH += ../../ethernet

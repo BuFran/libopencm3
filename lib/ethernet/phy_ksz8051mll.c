@@ -38,6 +38,10 @@
 
 /**@{*/
 
+struct phy_driver ksz8051_driver = {
+	.link_status = ksz8051_link_status,
+};
+
 /*---------------------------------------------------------------------------*/
 /** @brief Get the current link status
  *
@@ -45,9 +49,25 @@
  *
  * @returns ::phy_status Link status
  */
-enum phy_status phy_link_status(void)
+enum phy_status ksz8051_link_status(void)
 {
-	return eth_smi_read(1, PHY_REG_CR1) & 0x07;
+	switch (eth_smi_read(1, KSZ8051_CR1) & KSZ8051_CR1_MODE) {
+		case KSZ8051_CR1_MODE_10HD:
+			return LINK_HD_10M;
+
+		case KSZ8051_CR1_MODE_100HD:
+			return LINK_HD_100M;
+
+		case KSZ8051_CR1_MODE_10FD:
+			return LINK_FD_10M;
+
+		case KSZ8051_CR1_MODE_100FD:
+			return LINK_FD_100M;
+
+		case KSZ8051_CR1_MODE_AUTONEG:
+		default:
+			return LINK_DOWN;
+	}
 }
 
 /*---------------------------------------------------------------------------*/
@@ -57,7 +77,7 @@ enum phy_status phy_link_status(void)
  *
  * @param[in] mode enum phy_status Desired link status
  */
-void phy_autoneg_force(enum phy_status mode)
+void ksz8051_autoneg_force(enum phy_status mode)
 {
 	uint16_t bst = 0;
 
@@ -79,7 +99,7 @@ void phy_autoneg_force(enum phy_status mode)
  *
  * Enable the autonegotiation of the link speed and duplex mode
  */
-void phy_autoneg_enable(void)
+void ksz8051_autoneg_enable(void)
 {
 	eth_smi_bit_set(1, PHY_REG_BCR, PHY_REG_BCR_AN | PHY_REG_BCR_ANRST);
 }

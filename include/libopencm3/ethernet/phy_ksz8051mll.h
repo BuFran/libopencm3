@@ -194,9 +194,19 @@
 /* API definitions                                                           */
 /*****************************************************************************/
 
+extern struct phy_driver ksz8051_driver;
+
 /*****************************************************************************/
 /* API Functions                                                             */
 /*****************************************************************************/
+
+BEGIN_DECLS
+
+enum phy_status ksz8051_link_status(void);
+void ksz8051_autoneg_force(enum phy_status mode);
+void ksz8051_autoneg_enable(void);
+
+END_DECLS
 
 /**@}*/
 

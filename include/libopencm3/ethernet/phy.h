@@ -86,6 +86,12 @@ enum phy_status {
 	LINK_FD_10000M,
 };
 
+typedef enum phy_status (*phy_driver_linkstatus_t)(void);
+
+struct phy_driver {
+	phy_driver_linkstatus_t link_status;
+};
+
 /*****************************************************************************/
 /* API Functions                                                             */
 /*****************************************************************************/
@@ -94,11 +100,6 @@ BEGIN_DECLS
 
 void phy_reset(void);
 bool phy_link_isup(void);
-
-enum phy_status phy_link_status(void);
-
-void phy_autoneg_force(enum phy_status mode);
-void phy_autoneg_enable(void);
 
 END_DECLS
 
