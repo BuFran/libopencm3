@@ -43,6 +43,12 @@
 	@printf "  LD      $(*).elf\n"
 	$(Q)$(LD) $(OBJS) $(LDLIBS) $(LDFLAGS) -T$(LDSCRIPT) $(ARCH_FLAGS)  -o $@
 
+
+%.elf %.map: $(OBJS) $(LDSCRIPT) $(LIBDEPS)
+	@printf "  LD      $(*).elf\n"
+	@printf "  MAP     $(*).map\n"
+	$(Q)$(LD) $(OBJS) $(LDLIBS) $(LDFLAGS) -Wl,-Map=$(*).map -T$(LDSCRIPT) $(ARCH_FLAGS)  -o $(*).elf
+
 %.o: %.c
 	@printf "  CC      $<\n"
 	$(Q)$(CC) $(CFLAGS) $(CPPFLAGS) $(ARCH_FLAGS) -o $@ -c $<
