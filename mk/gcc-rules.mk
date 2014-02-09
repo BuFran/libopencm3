@@ -49,6 +49,10 @@
 	@$(PRINTF) "  MAP     $(*).map\n"
 	$(Q)$(LD) $(OBJS) $(LDLIBS) $(LDFLAGS) -Wl,-Map=$(*).map -T$(LDSCRIPT) $(ARCH_FLAGS)  -o $(*).elf
 
+%.a: $(OBJS)
+	@$(PRINTF) "  AR      $(@F)\n"
+	$(Q)$(AR) $(ARFLAGS) $@ $(OBJS)
+
 %.o: %.c
 	@$(PRINTF) "  CC      $<\n"
 	$(Q)$(CC) $(CFLAGS) $(CPPFLAGS) $(ARCH_FLAGS) -o $@ -c $<
