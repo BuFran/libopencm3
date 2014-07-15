@@ -35,8 +35,6 @@ specific memorymap.h header before including this header file.*/
 #ifndef LIBOPENCM3_ADC_COMMON_V1_H
 #define LIBOPENCM3_ADC_COMMON_V1_H
 
-#include <libopencm3/cm3/common.h>
-
 /* --- Convenience macros -------------------------------------------------- */
 
 /* ADC port base addresses (for convenience) */
@@ -75,6 +73,20 @@ specific memorymap.h header before including this header file.*/
 #define ADC1_JOFR2                      ADC_JOFR2(ADC1)
 #define ADC1_JOFR3                      ADC_JOFR3(ADC1)
 #define ADC1_JOFR4                      ADC_JOFR4(ADC1)
+
+#define ADC1_HTR                        ADC_HTR(ADC1)
+#define ADC1_LTR                        ADC_LTR(ADC1)
+
+#define ADC1_SQR1                       ADC_SQR1(ADC1)
+#define ADC1_SQR2                       ADC_SQR2(ADC1)
+#define ADC1_SQR3                       ADC_SQR3(ADC1)
+#define ADC1_JSQR                       ADC_JSQR(ADC1)
+
+#define ADC1_JDR1                       ADC_JDR1(ADC1)
+#define ADC1_JDR2                       ADC_JDR2(ADC1)
+#define ADC1_JDR3                       ADC_JDR3(ADC1)
+#define ADC1_JDR4                       ADC_JDR4(ADC1)
+#define ADC1_DR                         ADC_DR(ADC1)
 
 #if defined(ADC2_BASE)
 #define ADC2                            ADC2_BASE

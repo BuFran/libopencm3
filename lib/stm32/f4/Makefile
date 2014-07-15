@@ -19,6 +19,7 @@
 ##
 
 LIBNAME		= libopencm3_stm32f4
+SRCLIBDIR	?= ../..
 
 FP_FLAGS	?= -mfloat-abi=hard -mfpu=fpv4-sp-d16
 PREFIX	        ?= arm-none-eabi
@@ -50,7 +51,7 @@ OBJS            += crc_common_all.o dac_common_all.o dma_common_f24.o \
 OBJS	+= can_common_bxcan.o
 
 OBJS            += usb.o usb_standard.o usb_control.o usb_fx07_common.o \
-		   usb_f107.o usb_f207.o
+		   usb_f107.o usb_f207.o usb_msc.o
 
 OBJS		+= mac.o phy.o mac_stm32fxx7.o phy_ksz8051mll.o fmc.o
 
