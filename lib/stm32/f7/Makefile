@@ -53,7 +53,7 @@ GCC_SUPPORTS	= $(shell $(CC) -fsyntax-only $(1) -S /dev/null 2>/dev/null && echo
 ifneq ($(call GCC_SUPPORTS,-mcpu=cortex-m7 -mthumb $(FP_FLAGS)),1)
 
   $(warning "Your gcc toolchain does not support Cortex-M7 or selected FPU ABI.")
-  $(warning "For succesful build, please use gcc-arm-embedded version 4.8 2014q4 or newer")
+  $(warning "For succesful build, please use gcc-arm-embedded version 4.8 2014q3 or newer")
   $(warning "Skipping build of $(LIBNAME)")
 
 all:
