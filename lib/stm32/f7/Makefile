@@ -27,7 +27,7 @@ CC		= $(PREFIX)-gcc
 AR		= $(PREFIX)-ar
 
 # By default, use double precision FPU
-FP_FLAGS	?= -mfloat-abi=hard -mfpu=fpv4-d16
+FP_FLAGS	?= -mfloat-abi=hard -mfpu=fpv5-d16
 
 CFLAGS		= -Os -g \
 		  -Wall -Wextra -Wimplicit-function-declaration \
@@ -48,13 +48,15 @@ VPATH += ../../ethernet
 ###############################################################################
 # Checking CPU support in the toolchain
 ###############################################################################
-GCC_SUPPORTS	= $(shell $(CC) -fsyntax-only $(1) -S /dev/null 2>/dev/null && echo "1" || echo "0")
+# TODO: This check and silent skip of build should be removed, when it will be
+# sure that first compatible toolchain (g-a-e 4.8 2014q3) will be sufficiently
+# penetrated in majority of user stations.
+#
+ifneq ($(shell $(CC) -fsyntax-only -mcpu=cortex-m8 -mthumb -xc /dev/null 2>&1; echo $$?),0)
 
-ifneq ($(call GCC_SUPPORTS,-mcpu=cortex-m7 -mthumb $(FP_FLAGS)),1)
-
-  $(warning "Your gcc toolchain does not support Cortex-M7 or selected FPU ABI.")
-  $(warning "For succesful build, please use gcc-arm-embedded version 4.8 2014q3 or newer")
-  $(warning "Skipping build of $(LIBNAME)")
+  $(warning "Your gcc toolchain does not support Cortex-M7 CPU.")
+  $(warning "To workaround, use gcc-arm-embedded version 4.8 2014q3 or newer")
+  $(warning "Skipping build of $(LIBNAME).a silently.")
 
 all:
 	@true
