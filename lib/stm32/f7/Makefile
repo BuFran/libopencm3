@@ -21,20 +21,23 @@
 LIBNAME		= libopencm3_stm32f7
 SRCLIBDIR	?= ../..
 
-FP_FLAGS	?= -mfloat-abi=hard -mfpu=fpv4-sp-d16
-PREFIX	        ?= arm-none-eabi
+PREFIX		?= arm-none-eabi
 
 CC		= $(PREFIX)-gcc
 AR		= $(PREFIX)-ar
+
+# By default, use double precision FPU
+FP_FLAGS	?= -mfloat-abi=hard -mfpu=fpv4-d16
+
 CFLAGS		= -Os -g \
 		  -Wall -Wextra -Wimplicit-function-declaration \
 		  -Wredundant-decls -Wmissing-prototypes -Wstrict-prototypes \
 		  -Wundef -Wshadow \
 		  -I../../../include -fno-common \
-		  -mcpu=cortex-m4 -mthumb $(FP_FLAGS) \
+		  -mcpu=cortex-m7 -mthumb $(FP_FLAGS) \
 		  -Wstrict-prototypes \
 		  -ffunction-sections -fdata-sections -MD -DSTM32F7
-# ARFLAGS	= rcsv
+
 ARFLAGS		= rcs
 
 OBJS		= gpio.o gpio_common_all.o gpio_common_f0234.o
@@ -42,4 +45,23 @@ OBJS		= gpio.o gpio_common_all.o gpio_common_f0234.o
 VPATH += ../../usb:../:../../cm3:../common
 VPATH += ../../ethernet
 
-include ../../Makefile.include
+###############################################################################
+# Checking CPU support in the toolchain
+###############################################################################
+GCC_SUPPORTS	= $(shell $(CC) -fsyntax-only $(1) -S /dev/null 2>/dev/null && echo "1" || echo "0")
+
+ifneq ($(call GCC_SUPPORTS,-mcpu=cortex-m7 -mthumb $(FP_FLAGS)),1)
+
+  $(warning "Your gcc toolchain does not support Cortex-M7 or selected FPU ABI.")
+  $(warning "For succesful build, please use gcc-arm-embedded version 4.8 2014q4 or newer")
+  $(warning "Skipping build of $(LIBNAME)")
+
+all:
+	@true
+
+$(SRCLIBDIR)/$(LIBNAME).a:
+	@true
+
+else
+  include ../../Makefile.include
+endif
