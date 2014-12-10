@@ -29,14 +29,14 @@ CFLAGS		= -Os -g \
 		  -Wredundant-decls -Wmissing-prototypes -Wstrict-prototypes \
 		  -Wundef -Wshadow \
 		  -I../../../include -fno-common \
-		  -mcpu=cortex-m0 $(FP_FLAGS) -mthumb -Wstrict-prototypes \
+		  -mcpu=cortex-m0plus $(FP_FLAGS) -mthumb -Wstrict-prototypes \
 		  -ffunction-sections -fdata-sections -MD -DSTM32L0
 
 ARFLAGS		= rcs
 
-OBJS		= gpio.o
+OBJS		= gpio.o rcc.o
 
-OBJS            += gpio_common_all.o gpio_common_f0234.o
+OBJS            += gpio_common_all.o gpio_common_f0234.o rcc_common_all.o
 
 VPATH += ../../usb:../:../../cm3:../common
 
